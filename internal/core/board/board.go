@@ -9,12 +9,9 @@ const (
 	Size      = 9
 	BoxSize   = 3
 	CellCount = Size * Size
-)
-
-const (
-	Invalid State = iota
-	Valid
-	Solved
+	Invalid   = "Invalid"
+	Unsolved  = "Unsolved"
+	Solved    = "Solved"
 )
 
 var (
@@ -24,7 +21,7 @@ var (
 	ErrInvalidBoardState      = errors.New("invalid board state")
 )
 
-type State int
+type State string
 type Board struct {
 	Cells [Size][Size]Cell
 }
@@ -70,6 +67,29 @@ func FromString(s string) (*Board, error) {
 	return board, nil
 }
 
+func (b *Board) ToString(withCandidates bool) string {
+	var s strings.Builder
+
+	for row := 0; row < Size; row++ {
+		for col := 0; col < Size; col++ {
+			cell := b.Cells[row][col]
+
+			s.WriteRune(rune(cell.value + '0'))
+
+			if withCandidates && cell.value == EmptyCell {
+				for value := range AllCellValues {
+					if cell.candidates.Includes(value) {
+						s.WriteRune(CandidatePrefixRune)
+						s.WriteRune(rune(value + '0'))
+					}
+				}
+			}
+		}
+	}
+
+	return s.String()
+}
+
 func (b *Board) SetValueOnCoords(row, col, value int) error {
 	if value < EmptyCell || value > MaxValue {
 		return ErrInvalidCellValue
@@ -100,30 +120,7 @@ func (b *Board) SetValueOnIndex(index int, value int) error {
 	return b.SetValueOnCoords(row, col, value)
 }
 
-func (b *Board) ToString(withCandidates bool) string {
-	var s strings.Builder
-
-	for row := 0; row < Size; row++ {
-		for col := 0; col < Size; col++ {
-			cell := b.Cells[row][col]
-
-			s.WriteRune(rune(cell.value + '0'))
-
-			if withCandidates && cell.value == EmptyCell {
-				for value := range AllCellValues {
-					if cell.candidates.Includes(value) {
-						s.WriteRune(CandidatePrefixRune)
-						s.WriteRune(rune(value + '0'))
-					}
-				}
-			}
-		}
-	}
-
-	return s.String()
-}
-
-func (b *Board) ValidateBoardState() State {
+func (b *Board) ValidateState() State {
 	allRowsSolved, err := validateRows(b)
 	if err != nil {
 		return Invalid
@@ -145,7 +142,7 @@ func (b *Board) ValidateBoardState() State {
 		return Solved
 	}
 
-	return Valid
+	return Unsolved
 }
 
 func validateRows(b *Board) (bool, error) {

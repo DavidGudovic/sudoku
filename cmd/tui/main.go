@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/DavidGudovic/sudoku/internal/core/board"
-	"github.com/DavidGudovic/sudoku/internal/core/solver"
 )
 
 func main() {
@@ -20,24 +19,18 @@ func main() {
 
 	fmt.Println(boardFromAString.ToString(true))
 
-	boardFromAString.SetValueOnCoords(1, 6, board.Nine)
-	boardFromAString.SetValueOnCoords(5, 2, board.One)
-	boardFromAString.SetValueOnCoords(8, 5, board.Two)
-	boardFromAString.SetValueOnCoords(6, 7, board.Five)
-	boardFromAString.SetValueOnCoords(2, 7, board.Six)
-	boardFromAString.SetValueOnCoords(3, 1, board.Four)
+	_ = boardFromAString.SetValueOnCoords(1, 6, 9)
+	_ = boardFromAString.SetValueOnCoords(5, 2, 1)
+	_ = boardFromAString.SetValueOnCoords(8, 5, 2)
+	_ = boardFromAString.SetValueOnCoords(6, 7, 5)
+	_ = boardFromAString.SetValueOnCoords(2, 7, 6)
+	_ = boardFromAString.SetValueOnCoords(3, 1, 4)
 
 	fmt.Println(boardFromAString.ToString(true))
 
-	bfv := solver.NewBacktrackingSolver(solver.NewValidator())
+	state := boardFromAString.ValidateState()
 
-	state, err := bfv.Validator.ValidateBoardState(boardFromAString)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("Board is solved:", state)
+	fmt.Println("State of known unsolved grid:", state)
 
 	solvedBoardString := "637159248281347956594268173816592734429783615375614829742936581953821467168475392"
 
@@ -47,29 +40,21 @@ func main() {
 		panic(err)
 	}
 
-	boardState, err := bfv.Validator.ValidateBoardState(solvedBoard)
+	boardState := solvedBoard.ValidateState()
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("The known solved Board is solved:", boardState)
+	fmt.Println("State of known solved grid:", boardState)
 
 	invalidBoard := board.NewBoard()
-	invalidBoard.SetValueOnCoords(1, 6, board.Nine)
-	invalidBoard.SetValueOnCoords(2, 6, board.Nine)
-	invalidBoard.SetValueOnCoords(2, 2, board.Six)
-	invalidBoard.SetValueOnCoords(2, 3, board.Six)
-	invalidBoard.SetValueOnCoords(5, 2, board.One)
-	invalidBoard.SetValueOnCoords(6, 1, board.Two)
-	invalidBoard.SetValueOnCoords(7, 4, board.Three)
+	_ = invalidBoard.SetValueOnCoords(1, 6, 9)
+	_ = invalidBoard.SetValueOnCoords(2, 6, 9)
+	_ = invalidBoard.SetValueOnCoords(2, 2, 6)
+	_ = invalidBoard.SetValueOnCoords(2, 3, 6)
+	_ = invalidBoard.SetValueOnCoords(5, 2, 3)
+	_ = invalidBoard.SetValueOnCoords(6, 1, 3)
+	_ = invalidBoard.SetValueOnCoords(7, 4, 5)
 
-	boardState, err = bfv.Validator.ValidateBoardState(invalidBoard)
+	boardState = invalidBoard.ValidateState()
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println("The invalid Board is solved:", boardState)
+	fmt.Println("State of known invalid grid:", boardState)
 
 }
