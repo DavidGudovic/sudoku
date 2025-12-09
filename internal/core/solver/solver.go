@@ -8,30 +8,14 @@ type Solver interface {
 	Solve(b *board.Board) error
 }
 
-type Validator interface {
-	ValidateBoardState(b *board.Board) (bool, error)
-}
+type BacktrackingSolver struct{}
 
-type BacktrackingSolver struct {
-	Validator Validator
-}
+type StrategySolver struct{}
 
-type StrategySolver struct {
-	Validator Validator
-}
-
-func NewBacktrackingSolver(v Validator) *BacktrackingSolver {
-	return &BacktrackingSolver{Validator: v}
-}
-
-func NewStrategySolver(v Validator) *StrategySolver {
-	return &StrategySolver{Validator: v}
-}
-
-func (s *BacktrackingSolver) Solve(b *board.Board) error {
+func (s *BacktrackingSolver) Solve(_ *board.Board) error {
 	return nil
 }
 
-func (s *StrategySolver) Solve(b *board.Board) error {
+func (s *StrategySolver) Solve(_ *board.Board) error {
 	return nil
 }
