@@ -29,6 +29,7 @@ const (
 	EmptyCell           = 0
 	CellCount           = RowCount * ColCount
 	BoxCellCount        = BoxRowCount * BoxColCount
+	BoxCount            = CellCount / BoxCellCount
 	CandidatePrefixRune = '_'
 )
 
@@ -54,13 +55,6 @@ type Cell struct {
 	Candidates [10]bool
 }
 
-func NewCell() *Cell {
-	return &Cell{
-		Value:      EmptyCell,
-		Candidates: AllCandidates,
-	}
-}
-
 func NewBoard() *Board {
 	cells := [RowCount][ColCount]*Cell{}
 
@@ -73,9 +67,28 @@ func NewBoard() *Board {
 	return &Board{Cells: cells}
 }
 
-func (b *Board) SetValue(row, col, value int) {
+func NewCell() *Cell {
+	return &Cell{
+		Value:      EmptyCell,
+		Candidates: AllCandidates,
+	}
+}
+
+func (b *Board) SetValueOnCoords(row, col, value int) {
 	b.Cells[row][col].Value = value
 	b.Cells[row][col].Candidates = NoCandidates
+}
+
+func (b *Board) SetValueOnIndex(index int, value int) error {
+	col, row, err := CoordsFromIndex(index)
+
+	if err != nil {
+		return err
+	}
+
+	b.SetValueOnCoords(row, col, value)
+
+	return nil
 }
 
 func (b *Board) ToString(withCandidates bool) string {
@@ -103,7 +116,7 @@ func (b *Board) ToString(withCandidates bool) string {
 
 func FromString(s string) (*Board, error) {
 	board := NewBoard()
-	cleanString, err := extractValuesStringRepresentation(s)
+	cleanString, err := filterCandidates(s)
 
 	if err != nil {
 		return nil, err
@@ -122,7 +135,7 @@ func FromString(s string) (*Board, error) {
 			return nil, err
 		}
 
-		board.SetValue(row, col, int(s[i]-'0'))
+		board.SetValueOnCoords(row, col, int(s[i]-'0'))
 	}
 
 	return board, nil
@@ -133,10 +146,10 @@ func CoordsFromIndex(index int) (int, int, error) {
 		return 0, 0, ErrIndexOutOfBounds
 	}
 
-	return index / 9, index % 9, nil
+	return index / Size, index % Size, nil
 }
 
-func extractValuesStringRepresentation(s string) (string, error) {
+func filterCandidates(s string) (string, error) {
 	var sb strings.Builder
 	isCandidate := false
 
