@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	Size      = 9
-	BoxSize   = 3
-	CellCount = Size * Size
-	Invalid   = "Invalid"
-	Unsolved  = "Unsolved"
-	Solved    = "Solved"
+	Size            = 9
+	BoxSize         = 3
+	CellCount       = Size * Size
+	Invalid   State = "Invalid"
+	Unsolved  State = "Unsolved"
+	Solved    State = "Solved"
 )
 
 var (
@@ -22,6 +22,7 @@ var (
 )
 
 type State string
+
 type Board struct {
 	Cells [Size][Size]Cell
 }
