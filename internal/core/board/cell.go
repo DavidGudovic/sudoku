@@ -34,8 +34,16 @@ func NewCell() Cell {
 	}
 }
 
-func (bm BitMask) Includes(value int) bool {
-	return bm&(1<<uint(value)) != 0
+func (bm *BitMask) Contains(value int) bool {
+	return *bm&(1<<value) != 0
+}
+
+func (bm *BitMask) Add(value int) {
+	*bm |= 1 << value
+}
+
+func (bm *BitMask) Remove(value int) {
+	*bm &= ^(1 << value)
 }
 
 func (c Cell) Value() int {

@@ -8,7 +8,8 @@ import (
 const (
 	Size            = 9
 	BoxSize         = 3
-	CellCount       = Size * Size
+	BoxCount        = 9
+	CellCount       = 81
 	Invalid   State = "Invalid"
 	Unsolved  State = "Unsolved"
 	Solved    State = "Solved"
@@ -18,7 +19,6 @@ var (
 	ErrInvalidStringRep       = errors.New("invalid string representation")
 	ErrInvalidRuneInStringRep = errors.New("invalid rune in string")
 	ErrIndexOutOfBounds       = errors.New("index out of bounds")
-	ErrInvalidBoardState      = errors.New("invalid board state")
 )
 
 type State string
@@ -78,8 +78,8 @@ func (b *Board) ToString(withCandidates bool) string {
 			s.WriteRune(rune(cell.value + '0'))
 
 			if withCandidates && cell.value == EmptyCell {
-				for value := range AllCellValues {
-					if cell.candidates.Includes(value) {
+				for _, value := range AllCellValues {
+					if cell.candidates.Contains(value) {
 						s.WriteRune(CandidatePrefixRune)
 						s.WriteRune(rune(value + '0'))
 					}
@@ -121,120 +121,40 @@ func (b *Board) SetValueOnIndex(index int, value int) error {
 	return b.SetValueOnCoords(row, col, value)
 }
 
-func (b *Board) ValidateState() State {
-	allRowsSolved, err := validateRows(b)
-	if err != nil {
-		return Invalid
-	}
+func (b *Board) GetState() State {
+	var rows [Size]BitMask
+	var cols [Size]BitMask
+	var boxes [BoxCount]BitMask
 
-	allColsSolved, err := validateCols(b)
-	if err != nil {
-		return Invalid
-	}
-
-	allBoxesSolved, err := validateBoxes(b)
-	if err != nil {
-		return Invalid
-	}
-
-	solved := allRowsSolved && allColsSolved && allBoxesSolved
-
-	if solved {
-		return Solved
-	}
-
-	return Unsolved
-}
-
-func validateRows(b *Board) (bool, error) {
-	var seen [MaxValue + 1]bool
-	allRowsSolved := true
-
-	for _, rowArray := range b.Cells {
-		for _, cell := range rowArray {
-			if cell.value == EmptyCell {
-				continue
-			}
-
-			if seen[cell.value] {
-				return false, ErrInvalidBoardState
-			}
-
-			seen[cell.value] = true
-		}
-		allRowsSolved = allRowsSolved && allValuesSeen(seen)
-		seen = [MaxValue + 1]bool{}
-	}
-
-	return allRowsSolved, nil
-}
-
-func validateCols(b *Board) (bool, error) {
-	var seen [MaxValue + 1]bool
-	allColsSolved := true
-
-	for col := 0; col < Size; col++ {
-		for row := 0; row < Size; row++ {
+	for row := 0; row < Size; row++ {
+		for col := 0; col < Size; col++ {
 			value := b.Cells[row][col].value
 
 			if value == EmptyCell {
 				continue
 			}
 
-			if seen[value] {
-				return false, ErrInvalidBoardState
+			boxID := (row/BoxSize)*BoxSize + (col / BoxSize)
+
+			if rows[row].Contains(value) || cols[col].Contains(value) || boxes[boxID].Contains(value) {
+				return Invalid
 			}
 
-			seen[value] = true
+			rows[row].Add(value)
+			cols[col].Add(value)
+			boxes[boxID].Add(value)
 		}
-
-		allColsSolved = allColsSolved && allValuesSeen(seen)
-		seen = [MaxValue + 1]bool{}
 	}
 
-	return allColsSolved, nil
+	return b.resolveState(rows, cols, boxes)
 }
 
-func validateBoxes(b *Board) (bool, error) {
-	var seen [MaxValue + 1]bool
-	allBoxesSolved := true
-
-	for boxRow := range BoxSize {
-		for boxCol := range BoxSize {
-
-			for rowInBox := 0; rowInBox < BoxSize; rowInBox++ {
-				for colInBox := 0; colInBox < BoxSize; colInBox++ {
-					rowInSudoku := boxRow*BoxSize + rowInBox
-					colInSudoku := boxCol*BoxSize + colInBox
-
-					value := b.Cells[rowInSudoku][colInSudoku].value
-
-					if value == EmptyCell {
-						continue
-					}
-
-					if seen[value] {
-						return false, ErrInvalidBoardState
-					}
-
-					seen[value] = true
-				}
-			}
-
-			allBoxesSolved = allBoxesSolved && allValuesSeen(seen)
-			seen = [MaxValue + 1]bool{}
+func (b *Board) resolveState(rows, cols, boxes [Size]BitMask) State {
+	for i := 0; i < Size; i++ {
+		if (rows[i] & cols[i] & boxes[i]) != AllCandidates {
+			return Unsolved
 		}
 	}
 
-	return allBoxesSolved, nil
-}
-
-func allValuesSeen(seen [MaxValue + 1]bool) bool {
-	for _, value := range AllCellValues {
-		if !seen[value] {
-			return false
-		}
-	}
-
-	return true
+	return Solved
 }

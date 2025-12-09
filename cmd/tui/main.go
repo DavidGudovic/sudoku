@@ -28,7 +28,7 @@ func main() {
 
 	fmt.Println(boardFromAString.ToString(true))
 
-	state := boardFromAString.ValidateState()
+	state := boardFromAString.GetState()
 
 	fmt.Println("State of known unsolved grid:", state)
 
@@ -40,7 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	boardState := solvedBoard.ValidateState()
+	boardState := solvedBoard.GetState()
 
 	fmt.Println("State of known solved grid:", boardState)
 
@@ -53,7 +53,7 @@ func main() {
 	_ = invalidBoard.SetValueOnCoords(6, 1, 3)
 	_ = invalidBoard.SetValueOnCoords(7, 4, 5)
 
-	boardState = invalidBoard.ValidateState()
+	boardState = invalidBoard.GetState()
 
 	fmt.Println("State of known invalid grid:", boardState)
 
