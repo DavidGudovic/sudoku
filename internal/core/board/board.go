@@ -134,15 +134,15 @@ func (b *Board) GetState() State {
 				continue
 			}
 
-			boxID := (row/BoxSize)*BoxSize + (col / BoxSize)
+			box := (row/BoxSize)*BoxSize + (col / BoxSize)
 
-			if rows[row].Contains(value) || cols[col].Contains(value) || boxes[boxID].Contains(value) {
+			if rows[row].Contains(value) || cols[col].Contains(value) || boxes[box].Contains(value) {
 				return Invalid
 			}
 
 			rows[row].Add(value)
 			cols[col].Add(value)
-			boxes[boxID].Add(value)
+			boxes[box].Add(value)
 		}
 	}
 
