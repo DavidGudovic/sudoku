@@ -152,9 +152,9 @@ func (b *Board) GetValueByIndex(index int) (int, error) {
 //   - Unsolved is a board state which != Invalid, but still has Cells with no value (EmptyCell value)
 //   - Solved is a board state in which all Cells have values, and no row/column or box has > 1 of any value.
 func (b *Board) GetState() State {
-	var rows [Size]BitMask
-	var cols [Size]BitMask
-	var boxes [BoxCount]BitMask
+	var rows [Size]CandidateSet
+	var cols [Size]CandidateSet
+	var boxes [BoxCount]CandidateSet
 
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
@@ -181,7 +181,7 @@ func (b *Board) GetState() State {
 
 // resolveState is a helper function to check if every value has been seen in every row/col/box
 // If it has, the Board is Solved, else it's Unsolved
-func (b *Board) resolveState(rows, cols, boxes [Size]BitMask) State {
+func (b *Board) resolveState(rows, cols, boxes [Size]CandidateSet) State {
 	for i := 0; i < Size; i++ {
 		if (rows[i] & cols[i] & boxes[i]) != AllCandidates {
 			return Unsolved

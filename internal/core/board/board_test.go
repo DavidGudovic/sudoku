@@ -124,7 +124,7 @@ func TestBoard_GetSetValue(t *testing.T) {
 	}
 }
 
-func TestBoard_SerializeUnserialzie(t *testing.T) {
+func TestBoard_SerializeSerializer(t *testing.T) {
 	board := NewBoard()
 	newBoard, err := FromString(board.ToString(true))
 
