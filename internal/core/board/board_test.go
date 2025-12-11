@@ -36,3 +36,98 @@ func TestBoard_GetState(t *testing.T) {
 		})
 	}
 }
+
+func TestCoordsFromIndex(t *testing.T) {
+	tests := []struct {
+		name    string
+		index   int
+		wantRow int
+		wantCol int
+		wantErr bool
+	}{
+		{
+			name:    "Valid Index",
+			index:   54,
+			wantRow: 6,
+			wantCol: 0,
+			wantErr: false,
+		},
+		{
+			name:    "Invalid Index",
+			index:   -1,
+			wantRow: 0,
+			wantCol: 0,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			row, col, err := CoordsFromIndex(tt.index)
+
+			if tt.wantErr {
+				assert.Error(t, err, ErrIndexOutOfBounds)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantRow, row)
+			assert.Equal(t, tt.wantCol, col)
+		})
+	}
+}
+
+func TestBoard_GetSetValue(t *testing.T) {
+	tests := []struct {
+		name    string
+		board   *Board
+		index   int
+		wantErr bool
+		value   int
+	}{
+		{
+			name:    "Set Value",
+			board:   NewBoard(),
+			index:   54,
+			wantErr: false,
+			value:   1,
+		},
+		{
+			name:    "Set Illegal Value",
+			board:   NewBoard(),
+			index:   54,
+			wantErr: true,
+			value:   10,
+		},
+		{
+			name:    "Set Illegal Index",
+			board:   NewBoard(),
+			index:   -1,
+			wantErr: true,
+			value:   5,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.board.SetValueOnIndex(tt.index, tt.value)
+
+			if tt.wantErr {
+				assert.Error(t, err, ErrIndexOutOfBounds)
+				return
+			}
+
+			assert.NoError(t, err)
+			value, _ := tt.board.GetValueByIndex(tt.index)
+			assert.Equal(t, tt.value, value)
+		})
+	}
+}
+
+func TestBoard_SerializeUnserialzie(t *testing.T) {
+	board := NewBoard()
+	newBoard, err := FromString(board.ToString(true))
+
+	assert.NoError(t, err)
+	assert.Equal(t, newBoard, board)
+}
