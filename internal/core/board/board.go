@@ -1,5 +1,7 @@
 package board
 
+//go:generate stringer -type=State
+
 import (
 	"errors"
 	"strings"
@@ -10,9 +12,9 @@ const (
 	BoxSize         = 3
 	BoxCount        = 9
 	CellCount       = 81
-	Invalid   State = "Invalid"
-	Unsolved  State = "Unsolved"
-	Solved    State = "Solved"
+	Invalid   State = iota
+	Unsolved
+	Solved
 )
 
 var (
@@ -21,7 +23,7 @@ var (
 	ErrIndexOutOfBounds       = errors.New("index out of bounds")
 )
 
-type State string
+type State int
 
 type Board struct {
 	Cells [Size][Size]Cell
