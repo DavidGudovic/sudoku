@@ -103,7 +103,7 @@ func (b *Board) ToString(withCandidates bool) string {
 
 			if withCandidates && cell.value == EmptyCell {
 				for _, value := range AllCellValues {
-					if cell.candidates.Contains(value) {
+					if cell.ContainsCandidate(value) {
 						s.WriteRune(CandidatePrefixRune)
 						s.WriteRune(rune(value + '0'))
 					}

@@ -18,6 +18,16 @@ func TestBoard_GetState(t *testing.T) {
 			want:  Unsolved,
 		},
 		{
+			name:  "Known unsolved valid board 2",
+			board: "006003020070004000100006970002008090700030061030600000408000005000000002001040730",
+			want:  Unsolved,
+		},
+		{
+			name:  "Known unsolved valid board 3",
+			board: "010000000007005460306400000000370001702000300000904005400701006000000500580000200",
+			want:  Unsolved,
+		},
+		{
 			name:  "Known solved board",
 			board: "637159248281347956594268173816592734429783615375614829742936581953821467168475392",
 			want:  Solved,

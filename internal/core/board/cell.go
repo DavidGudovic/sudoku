@@ -29,21 +29,6 @@ type Cell struct {
 	candidates CandidateSet
 }
 
-// NewCandidateSet creates a new CandidateSet with the provided values turned on.
-func NewCandidateSet(args ...int) (CandidateSet, error) {
-	cs := NoCandidates
-
-	for _, i := range args {
-		err := cs.Add(i)
-
-		if err != nil {
-			return NoCandidates, err
-		}
-	}
-
-	return cs, nil
-}
-
 // NewCell creates a new Cell with an EmptyCell value and AllCandidates available.
 func NewCell() Cell {
 	return Cell{
@@ -79,4 +64,8 @@ func (c Cell) Value() int {
 
 func (c Cell) Candidates() CandidateSet {
 	return c.candidates
+}
+
+func (c Cell) ContainsCandidate(val int) bool {
+	return c.candidates.Contains(val)
 }
