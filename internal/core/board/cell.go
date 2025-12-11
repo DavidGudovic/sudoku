@@ -29,6 +29,21 @@ type Cell struct {
 	candidates CandidateSet
 }
 
+// NewCandidateSet creates a new CandidateSet with the provided values turned on.
+func NewCandidateSet(args ...int) (CandidateSet, error) {
+	cs := NoCandidates
+
+	for _, i := range args {
+		err := cs.Add(i)
+
+		if err != nil {
+			return NoCandidates, err
+		}
+	}
+
+	return cs, nil
+}
+
 // NewCell creates a new Cell with an EmptyCell value and AllCandidates available.
 func NewCell() Cell {
 	return Cell{
@@ -43,8 +58,14 @@ func (bm *CandidateSet) Contains(value int) bool {
 }
 
 // Add adds (sets the bit to 1) the specified candidate value to the CandidateSet.
-func (bm *CandidateSet) Add(value int) {
+func (bm *CandidateSet) Add(value int) error {
+	if value < MinValue || value > MaxValue {
+		return ErrInvalidCellValue
+	}
+
 	*bm |= 1 << value
+
+	return nil
 }
 
 // Remove removes (sets the bit to 0) the specified candidate value from the CandidateSet.

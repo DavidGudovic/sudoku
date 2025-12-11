@@ -2,12 +2,12 @@ package board
 
 import "strings"
 
-func CoordsFromIndex(index int) (int, int, error) {
+func CoordsFromIndex(index int) (Coordinates, error) {
 	if index < 0 || index >= CellCount {
-		return 0, 0, ErrIndexOutOfBounds
+		return NewCoordinates(0, 0), ErrIndexOutOfBounds
 	}
 
-	return index / Size, index % Size, nil
+	return NewCoordinates(index/Size, index%Size), nil
 }
 
 func filterCandidates(s string) (string, error) {

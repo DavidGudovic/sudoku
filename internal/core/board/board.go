@@ -27,10 +27,24 @@ var (
 	ErrIndexOutOfBounds       = errors.New("index out of bounds")
 )
 
+// State represents the current state of the board
+//   - Invalid is a board state in which any row/column or a box has > 1 of any value.
+//   - Unsolved is a board state which != Invalid, but still has Cells with no value (EmptyCell value)
+//   - Solved is a board state in which all Cells have values, and no row/column or box has > 1 of any value.
 type State int
+
+type Coordinates struct {
+	Row int
+	Col int
+}
 
 type Board struct {
 	Cells [Size][Size]Cell
+}
+
+// NewCoordinates creates a new Coordinates struct
+func NewCoordinates(row, col int) Coordinates {
+	return Coordinates{Row: row, Col: col}
 }
 
 // NewBoard initializes a Size*Size empty board with full candidates
@@ -60,13 +74,13 @@ func FromString(s string) (*Board, error) {
 	}
 
 	for i := 0; i < CellCount; i++ {
-		row, col, err := CoordsFromIndex(i)
+		c, err := CoordsFromIndex(i)
 
 		if err != nil {
 			return nil, err
 		}
 
-		err = board.SetValueOnCoords(row, col, int(valuesOnly[i]-'0'))
+		err = board.SetValueOnCoords(c, int(valuesOnly[i]-'0'))
 
 		if err != nil {
 			return nil, err
@@ -101,56 +115,54 @@ func (b *Board) ToString(withCandidates bool) string {
 	return s.String()
 }
 
-// SetValueOnCoords sets the value on the row and column provided,
+// SetValueOnCoords sets the value on Coordinates provided,
 // unless the value, or the coordinates are illegal, in which case it returns a non-nil error.
-func (b *Board) SetValueOnCoords(row, col, value int) error {
+func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 	if value < EmptyCell || value > MaxValue {
 		return ErrInvalidCellValue
 	}
 
-	if row < 0 || row >= Size || col < 0 || col >= Size {
+	if c.Row < 0 || c.Row >= Size || c.Col < 0 || c.Col >= Size {
 		return ErrIndexOutOfBounds
 	}
 
-	b.Cells[row][col].value = value
+	b.Cells[c.Row][c.Col].value = value
 
 	if value != EmptyCell {
-		b.Cells[row][col].candidates = NoCandidates
+		b.Cells[c.Row][c.Col].candidates = NoCandidates
 	} else {
-		b.Cells[row][col].candidates = AllCandidates
+		b.Cells[c.Row][c.Col].candidates = AllCandidates
 	}
 
 	return nil
 }
 
-// SetValueOnIndex sets the value on the row and column corresponding to the given 0-based index,
+// SetValueOnIndex sets the value on Coordinates corresponding to the given 0-based index,
 // unless the value, or the coordinates are illegal, in which case it returns a non-nil error.
 func (b *Board) SetValueOnIndex(index int, value int) error {
-	row, col, err := CoordsFromIndex(index)
+	c, err := CoordsFromIndex(index)
 
 	if err != nil {
 		return err
 	}
 
-	return b.SetValueOnCoords(row, col, value)
+	return b.SetValueOnCoords(c, value)
 }
 
-// GetValueByIndex gets the value from the row and column corresponding to the given 0-based index,
+// GetValueByIndex gets the value from Coordinates corresponding to the given 0-based index,
 // unless the index is illegal, in which case it returns ErrIndexOutOfBounds
 func (b *Board) GetValueByIndex(index int) (int, error) {
-	row, col, err := CoordsFromIndex(index)
+	c, err := CoordsFromIndex(index)
 
 	if err != nil {
 		return 0, err
 	}
 
-	return b.Cells[row][col].value, nil
+	return b.Cells[c.Row][c.Col].value, nil
 }
 
 // GetState resolves the current state of the board into one of [ Invalid, Unsolved, Solved]
-//   - Invalid is a board state in which any row/column or a box has > 1 of any value.
-//   - Unsolved is a board state which != Invalid, but still has Cells with no value (EmptyCell value)
-//   - Solved is a board state in which all Cells have values, and no row/column or box has > 1 of any value.
+// See [State] for more information.
 func (b *Board) GetState() State {
 	var rows [Size]CandidateSet
 	var cols [Size]CandidateSet
@@ -170,9 +182,9 @@ func (b *Board) GetState() State {
 				return Invalid
 			}
 
-			rows[row].Add(value)
-			cols[col].Add(value)
-			boxes[box].Add(value)
+			_ = rows[row].Add(value)
+			_ = cols[col].Add(value)
+			_ = boxes[box].Add(value)
 		}
 	}
 

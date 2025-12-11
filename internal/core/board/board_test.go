@@ -63,7 +63,7 @@ func TestCoordsFromIndex(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			row, col, err := CoordsFromIndex(tt.index)
+			c, err := CoordsFromIndex(tt.index)
 
 			if tt.wantErr {
 				assert.Error(t, err, ErrIndexOutOfBounds)
@@ -71,8 +71,8 @@ func TestCoordsFromIndex(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, tt.wantRow, row)
-			assert.Equal(t, tt.wantCol, col)
+			assert.Equal(t, tt.wantRow, c.Row)
+			assert.Equal(t, tt.wantCol, c.Col)
 		})
 	}
 }
