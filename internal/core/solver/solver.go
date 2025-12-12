@@ -63,7 +63,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 
 			if step.MadeProgress() {
 				steps = append(steps, step)
-				progressMade = true // If any technique made progress, puzzle is still solvable
+				progressMade = true // If any technique made progress, the puzzle is still solvable
 
 				if step.PlacedValue != nil {
 					s.PropagateCandidates(&puzzle)
@@ -72,8 +72,8 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 			}
 		}
 
-		// Full cycle completed with no progress
-		// means further attempts are futile, or puzzle is solved
+		// A full cycle completed with no progress
+		// means further attempts are futile, or the puzzle is solved
 		if !progressMade {
 			break
 		}

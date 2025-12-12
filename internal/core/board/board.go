@@ -116,7 +116,7 @@ func (b *Board) ToString(withCandidates bool) string {
 }
 
 // SetValueOnCoords sets the value on Coordinates provided,
-// unless the value, or the coordinates are illegal, in which case it returns a non-nil error.
+// unless the value or the coordinates are illegal, in which case it returns a non-nil error.
 func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 	if value < EmptyCell || value > MaxValue {
 		return ErrInvalidCellValue
@@ -138,7 +138,7 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 }
 
 // SetValueOnIndex sets the value on Coordinates corresponding to the given 0-based index,
-// unless the value, or the coordinates are illegal, in which case it returns a non-nil error.
+// unless the value or the coordinates are illegal, in which case it returns a non-nil error.
 func (b *Board) SetValueOnIndex(index int, value int) error {
 	c, err := CoordsFromIndex(index)
 

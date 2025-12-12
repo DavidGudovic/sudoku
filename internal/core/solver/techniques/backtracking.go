@@ -9,7 +9,7 @@ import (
 type Backtracking struct{}
 
 // Apply attempts to solve the puzzle using backtracking.
-// It does not produce incremental steps, but returns the solved puzzle if successful.
+// It does not produce incremental steps but returns the solved puzzle if successful.
 func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 	solvedPuzzle, err := bt.backtrackSolve(*puzzle)
 
@@ -17,7 +17,7 @@ func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 		return Step{}, err
 	}
 
-	madeChanges := *puzzle == solvedPuzzle
+	madeChanges := *puzzle != solvedPuzzle
 
 	*puzzle = solvedPuzzle
 
@@ -28,15 +28,9 @@ func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 
 	if madeChanges {
 		step.RemovedCandidates = board.AllCandidates
-	} else {
-		step.RemovedCandidates = board.NoCandidates
 	}
 
 	return step, nil
-}
-
-func (bt Backtracking) ExpectsToSolve() bool {
-	return true
 }
 
 // backtrackSolve implements the backtracking algorithm to solve the Sudoku puzzle.
@@ -53,12 +47,12 @@ func (bt Backtracking) backtrackSolve(puzzle board.Board) (board.Board, error) {
 		if puzzle.Cells[c.Row][c.Col].ContainsCandidate(val) == false {
 			continue
 		}
+
 		_ = puzzle.SetValueOnCoords(c, val)
 
 		switch puzzle.GetState() {
 		case board.Invalid:
 			_ = puzzle.SetValueOnCoords(c, board.EmptyCell)
-			continue
 		case board.Solved:
 			return puzzle, nil
 		default:
