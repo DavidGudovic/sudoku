@@ -5,8 +5,7 @@ import (
 )
 
 type Technique interface {
-	Apply(puzzle board.Board) (Step, board.Board, error)
-	ExpectsToSolve() bool
+	Apply(puzzle *board.Board) (Step, error)
 }
 
 type Step struct {
@@ -32,58 +31,30 @@ type (
 	Skyscraper   struct{}
 )
 
-func (ns NakedSingle) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
+func (ns NakedSingle) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (ns NakedSingle) ExpectsToSolve() bool {
-	return false
+func (hs HiddenSingle) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (hs HiddenSingle) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
+func (np NakedPair) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (hs HiddenSingle) ExpectsToSolve() bool {
-	return false
+func (hp HiddenPair) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (np NakedPair) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
+func (pp PointingPair) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (np NakedPair) ExpectsToSolve() bool {
-	return false
+func (xw XWing) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }
 
-func (hp HiddenPair) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
-}
-
-func (hp HiddenPair) ExpectsToSolve() bool {
-	return false
-}
-
-func (pp PointingPair) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
-}
-
-func (pp PointingPair) ExpectsToSolve() bool {
-	return false
-}
-
-func (xw XWing) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
-}
-
-func (xw XWing) ExpectsToSolve() bool {
-	return false
-}
-
-func (ss Skyscraper) Apply(puzzle board.Board) (Step, board.Board, error) {
-	return Step{}, puzzle, nil
-}
-
-func (ss Skyscraper) ExpectsToSolve() bool {
-	return false
+func (ss Skyscraper) Apply(_ *board.Board) (Step, error) {
+	return Step{}, nil
 }

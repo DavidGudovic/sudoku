@@ -10,18 +10,29 @@ type Backtracking struct{}
 
 // Apply attempts to solve the puzzle using backtracking.
 // It does not produce incremental steps, but returns the solved puzzle if successful.
-func (bt Backtracking) Apply(puzzle board.Board) (Step, board.Board, error) {
-	solvedPuzzle, err := bt.backtrackSolve(puzzle)
+func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
+	solvedPuzzle, err := bt.backtrackSolve(*puzzle)
 
 	if err != nil {
-		return Step{}, puzzle, err
+		return Step{}, err
 	}
 
-	return Step{
-		Description:       "Backtracking does not produce incremental steps, but can solve any puzzle.",
-		Technique:         "Backtracking",
-		RemovedCandidates: board.AllCandidates,
-	}, solvedPuzzle, nil
+	madeChanges := *puzzle == solvedPuzzle
+
+	*puzzle = solvedPuzzle
+
+	step := Step{
+		Description: "Backtracking does not produce incremental steps, but can solve any puzzle.",
+		Technique:   "Backtracking",
+	}
+
+	if madeChanges {
+		step.RemovedCandidates = board.AllCandidates
+	} else {
+		step.RemovedCandidates = board.NoCandidates
+	}
+
+	return step, nil
 }
 
 func (bt Backtracking) ExpectsToSolve() bool {

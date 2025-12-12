@@ -55,7 +55,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 
 		// Attempt each technique in order
 		for _, technique := range s.techniques {
-			step, puzzle, err := technique.Apply(puzzle)
+			step, err := technique.Apply(&puzzle)
 
 			if err != nil {
 				return puzzle, nil, err
@@ -68,13 +68,6 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 				if step.PlacedValue != nil {
 					s.PropagateCandidates(&puzzle)
 					break // Previous (cheaper) techniques may now be applicable
-				}
-
-				// Techniques like Backtracking can directly solve the puzzle
-				if technique.ExpectsToSolve() {
-					if puzzle.GetState() == board.Solved {
-						return puzzle, steps, nil
-					}
 				}
 			}
 		}
