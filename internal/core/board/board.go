@@ -25,6 +25,7 @@ var (
 	ErrInvalidStringRep       = errors.New("invalid string representation")
 	ErrInvalidRuneInStringRep = errors.New("invalid rune in string")
 	ErrIndexOutOfBounds       = errors.New("index out of bounds")
+	ErrValueNotACandidate     = errors.New("value is not a candidate for this cell")
 )
 
 // State represents the current state of the board
@@ -37,8 +38,8 @@ type State int
 // Each Cell holds its current value and a CandidateSet.
 // The Board constraints (Sudoku rules), unless explicitly turned off by using a Faux board, are always enforced and all CandidateSet's are updated accordingly.
 type Board struct {
-	Cells              [Size][Size]Cell
-	enforceConstraints bool
+	Cells               [Size][Size]Cell
+	enforcesConstraints bool
 }
 
 // NewBoard initializes a Size*Size empty board with full candidates
@@ -51,7 +52,7 @@ func NewBoard() *Board {
 		}
 	}
 
-	return &Board{Cells: cells, enforceConstraints: true}
+	return &Board{Cells: cells, enforcesConstraints: true}
 }
 
 // NewFauxBoard initializes a Size*Size empty board with full candidates that does not enforce constraints when setting values.
@@ -60,7 +61,7 @@ func NewBoard() *Board {
 // or when automatic constraints enforcement is not desired i.e. manual candidate management.
 func NewFauxBoard() *Board {
 	board := NewBoard()
-	board.enforceConstraints = false
+	board.enforcesConstraints = false
 	return board
 }
 
@@ -135,7 +136,7 @@ func filterCandidates(s string) (string, error) {
 
 // IsFaux returns true if the board was created as a faux board (i.e. with constraints enforcement turned off)
 func (b *Board) IsFaux() bool {
-	return b.enforceConstraints == false
+	return b.enforcesConstraints == false
 }
 
 // ToString extracts a string representation from the current state of a board.
@@ -174,9 +175,13 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 		return ErrIndexOutOfBounds
 	}
 
+	if b.enforcesConstraints && value != EmptyCell && b.Cells[c.Row][c.Col].ContainsCandidate(value) == false {
+		return ErrValueNotACandidate
+	}
+
 	b.Cells[c.Row][c.Col].value = value
 
-	if b.enforceConstraints == false {
+	if b.enforcesConstraints == false {
 		return nil
 	}
 
@@ -230,7 +235,7 @@ func (b *Board) GetState() State {
 			cell := b.Cells[c.Row][c.Col]
 
 			if cell.value == EmptyCell {
-				if cell.candidates == NoCandidates && b.enforceConstraints {
+				if cell.candidates == NoCandidates && b.enforcesConstraints {
 					return Invalid
 				}
 
