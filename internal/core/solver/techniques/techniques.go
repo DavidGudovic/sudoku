@@ -17,6 +17,8 @@ type Step struct {
 	PlacedValue       *int
 }
 
+type StepStack []Step
+
 func (s Step) MadeProgress() bool {
 	return s.PlacedValue != nil || s.RemovedCandidates != board.NoCandidates
 }

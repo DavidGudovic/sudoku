@@ -12,7 +12,8 @@ var (
 )
 
 type Solver interface {
-	Solve(puzzle board.Board) (board.Board, []techniques.Step, error)
+	Solve(puzzle board.Board) (board.Board, techniques.StepStack, error)
+	TakeAStep(puzzle board.Board) (board.Board, techniques.Step, error)
 }
 
 type SudokuSolver struct {
@@ -52,8 +53,8 @@ func NewLogicalSolver() *SudokuSolver {
 
 // Solve attempts to solve the given Sudoku puzzle using the configured techniques.
 // It returns the solved board, a list of steps taken to solve it, or an error if unsolvable.
-func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step, error) {
-	var steps []techniques.Step
+func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepStack, error) {
+	var steps techniques.StepStack
 
 	for {
 		progressMade := false
@@ -85,4 +86,21 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 	}
 
 	return puzzle, nil, ErrUnsolvablePuzzle
+}
+
+// TakeAStep applies the next applicable technique to the puzzle and returns the updated board and the step taken.
+func (s *SudokuSolver) TakeAStep(puzzle board.Board) (board.Board, techniques.Step, error) {
+	for _, technique := range s.techniques {
+		step, err := technique.Apply(&puzzle)
+
+		if err != nil {
+			return puzzle, techniques.Step{}, err
+		}
+
+		if step.MadeProgress() {
+			return puzzle, step, nil
+		}
+	}
+
+	return puzzle, techniques.Step{}, ErrUnsolvablePuzzle
 }
