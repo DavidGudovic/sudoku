@@ -24,39 +24,12 @@ func (s Step) MadeProgress() bool {
 }
 
 type (
-	NakedSingle  struct{}
-	HiddenSingle struct{}
-	NakedPair    struct{}
-	HiddenPair   struct{}
-	PointingPair struct{}
-	XWing        struct{}
-	Skyscraper   struct{}
+	NakedSingle   struct{}
+	HiddenSingle  struct{}
+	NakedPair     struct{}
+	HiddenPair    struct{}
+	PointingPair  struct{}
+	XWing         struct{}
+	Skyscraper    struct{}
+	TwoStringKite struct{}
 )
-
-func (ns NakedSingle) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (hs HiddenSingle) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (np NakedPair) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (hp HiddenPair) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (pp PointingPair) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (xw XWing) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
-
-func (ss Skyscraper) Apply(_ *board.Board) (Step, error) {
-	return Step{}, nil
-}
