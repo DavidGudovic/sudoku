@@ -2,14 +2,6 @@ package board
 
 import "strings"
 
-func CoordsFromIndex(index int) (Coordinates, error) {
-	if index < 0 || index >= CellCount {
-		return NewCoordinates(0, 0), ErrIndexOutOfBounds
-	}
-
-	return NewCoordinates(index/Size, index%Size), nil
-}
-
 func filterCandidates(s string) (string, error) {
 	var sb strings.Builder
 	isCandidate := false

@@ -12,7 +12,7 @@ const (
 	BoxSize             = 3
 	BoxCount            = 9
 	CellCount           = 81
-	CandidatePrefixRune = '_'
+	CandidatePrefixRune = '*'
 )
 
 const (
@@ -28,23 +28,16 @@ var (
 )
 
 // State represents the current state of the board
-//   - Invalid is a board state in which any row/column or a box has > 1 of any value.
-//   - Unsolved is a board state which != Invalid, but still has Cells with no value (EmptyCell value)
-//   - Solved is a board state in which all Cells have values, and no row/column or box has > 1 of any value.
+//   - Invalid is a board state where at least one row, column, or box contains duplicate values, or an EmptyCell contains NoCandidates
+//   - Unsolved is a valid board state where at least one Cell is an EmptyCell
+//   - Solved is a valid board state where all Cells are filled with values.
 type State int
 
-type Coordinates struct {
-	Row int
-	Col int
-}
-
+// Board represents a Size*Size Sudoku board composed of Cells.
+// Each Cell holds its current value and a CandidateSet.
+// The Board constraints (Sudoku rules) are always enforced, and all CandidateSet's are updated accordingly.
 type Board struct {
 	Cells [Size][Size]Cell
-}
-
-// NewCoordinates creates a new Coordinates struct
-func NewCoordinates(row, col int) Coordinates {
-	return Coordinates{Row: row, Col: col}
 }
 
 // NewBoard initializes a Size*Size empty board with full candidates
@@ -102,7 +95,7 @@ func (b *Board) ToString(withCandidates bool) string {
 			s.WriteRune(rune(cell.value + '0'))
 
 			if withCandidates && cell.value == EmptyCell {
-				for _, value := range AllCellValues {
+				for value := MinValue; value <= MaxValue; value++ {
 					if cell.ContainsCandidate(value) {
 						s.WriteRune(CandidatePrefixRune)
 						s.WriteRune(rune(value + '0'))
@@ -128,10 +121,16 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 
 	b.Cells[c.Row][c.Col].value = value
 
+	// Clearing a cell
+	if value == EmptyCell {
+		b.Cells[c.Row][c.Col].candidates = AllCandidates
+		b.applyConstraints(c)
+	}
+
+	// Setting a cell
 	if value != EmptyCell {
 		b.Cells[c.Row][c.Col].candidates = NoCandidates
-	} else {
-		b.Cells[c.Row][c.Col].candidates = AllCandidates
+		b.propagateConstraints(c, value)
 	}
 
 	return nil
@@ -149,7 +148,7 @@ func (b *Board) SetValueOnIndex(index int, value int) error {
 	return b.SetValueOnCoords(c, value)
 }
 
-// GetValueByIndex gets the value from Coordinates corresponding to the given 0-based index,
+// GetValueByIndex gets the value from Coordinates corresponding to the given 0-based index (left to right, top to bottom),
 // unless the index is illegal, in which case it returns ErrIndexOutOfBounds
 func (b *Board) GetValueByIndex(index int) (int, error) {
 	c, err := CoordsFromIndex(index)
@@ -170,30 +169,33 @@ func (b *Board) GetState() State {
 
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			value := b.Cells[row][col].value
+			c := NewCoordinates(row, col)
+			cell := b.Cells[c.Row][c.Col]
 
-			if value == EmptyCell {
+			if cell.value == EmptyCell {
+				if cell.candidates == NoCandidates {
+					return Invalid
+				}
+
 				continue
 			}
 
-			box := (row/BoxSize)*BoxSize + (col / BoxSize)
-
-			if rows[row].Contains(value) || cols[col].Contains(value) || boxes[box].Contains(value) {
+			if rows[c.Row].Contains(cell.value) || cols[c.Col].Contains(cell.value) || boxes[c.BoxIndex()].Contains(cell.value) {
 				return Invalid
 			}
 
-			_ = rows[row].Add(value)
-			_ = cols[col].Add(value)
-			_ = boxes[box].Add(value)
+			_ = rows[c.Row].Add(cell.value)
+			_ = cols[c.Col].Add(cell.value)
+			_ = boxes[c.BoxIndex()].Add(cell.value)
 		}
 	}
 
-	return b.resolveState(rows, cols, boxes)
+	return b.resolveValidState(rows, cols, boxes)
 }
 
-// resolveState is a helper function to check if every value has been seen in every row/col/box
+// resolveValidState is a helper function to check if every value has been seen in every row/col/box
 // If it has, the Board is Solved, else it's Unsolved
-func (b *Board) resolveState(rows, cols, boxes [Size]CandidateSet) State {
+func (b *Board) resolveValidState(rows, cols, boxes [Size]CandidateSet) State {
 	for i := 0; i < Size; i++ {
 		if (rows[i] & cols[i] & boxes[i]) != AllCandidates {
 			return Unsolved
@@ -201,4 +203,42 @@ func (b *Board) resolveState(rows, cols, boxes [Size]CandidateSet) State {
 	}
 
 	return Solved
+}
+
+// applyConstraints recalculates the CandidateSet for the given Coordinates
+func (b *Board) applyConstraints(c Coordinates) {
+	cell := &b.Cells[c.Row][c.Col]
+	boxIndex := c.BoxIndex()
+
+	if cell.value != EmptyCell {
+		cell.candidates = NoCandidates
+		return
+	}
+
+	cell.candidates = AllCandidates
+	usedValues := NoCandidates
+
+	for i := 0; i < Size; i++ {
+		_ = usedValues.Add(b.Cells[c.Row][i].value)
+		_ = usedValues.Add(b.Cells[i][c.Col].value)
+
+		bc, _ := CoordsFromBoxIndex(boxIndex, i)
+		_ = usedValues.Add(b.Cells[bc.Row][bc.Col].value)
+	}
+
+	usedValues.Remove(0)
+	cell.candidates.Exclude(usedValues)
+}
+
+// propagateConstraints removes the given value from the CandidateSet of all Cells in the same row, column, and box as the given Coordinates
+func (b *Board) propagateConstraints(c Coordinates, value int) {
+	boxIndex := c.BoxIndex()
+
+	for i := 0; i < Size; i++ {
+		b.Cells[c.Row][i].candidates.Remove(value)
+		b.Cells[i][c.Col].candidates.Remove(value)
+
+		bc, _ := CoordsFromBoxIndex(boxIndex, i)
+		b.Cells[bc.Row][bc.Col].candidates.Remove(value)
+	}
 }

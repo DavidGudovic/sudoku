@@ -61,7 +61,7 @@ func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats)
 		return puzzle, nil
 	}
 
-	for _, val := range board.AllCellValues {
+	for val := board.MinValue; val <= board.MaxValue; val++ {
 		if puzzle.Cells[c.Row][c.Col].ContainsCandidate(val) == false {
 			continue
 		}
