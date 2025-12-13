@@ -69,10 +69,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 			if step.MadeProgress() {
 				steps = append(steps, step)
 				progressMade = true // If any technique made progress, the puzzle is still solvable
-
-				if step.PlacedValue != nil {
-					break // Previous (cheaper) techniques may now be applicable
-				}
+				break               // Previous (cheaper) techniques may now be applicable
 			}
 		}
 

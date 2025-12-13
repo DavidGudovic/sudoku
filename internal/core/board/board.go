@@ -35,9 +35,10 @@ type State int
 
 // Board represents a Size*Size Sudoku board composed of Cells.
 // Each Cell holds its current value and a CandidateSet.
-// The Board constraints (Sudoku rules) are always enforced, and all CandidateSet's are updated accordingly.
+// The Board constraints (Sudoku rules), unless explicitly turned off by using a Faux board, are always enforced and all CandidateSet's are updated accordingly.
 type Board struct {
-	Cells [Size][Size]Cell
+	Cells              [Size][Size]Cell
+	enforceConstraints bool
 }
 
 // NewBoard initializes a Size*Size empty board with full candidates
@@ -50,12 +51,29 @@ func NewBoard() *Board {
 		}
 	}
 
-	return &Board{Cells: cells}
+	return &Board{Cells: cells, enforceConstraints: true}
+}
+
+// NewFauxBoard initializes a Size*Size empty board with full candidates that does not enforce constraints when setting values.
+//
+// Used when the board is being populated from an external source (e.g. FromString) where the input may not adhere to Sudoku rules,
+// or when automatic constraints enforcement is not desired i.e. manual candidate management.
+func NewFauxBoard() *Board {
+	board := NewBoard()
+	board.enforceConstraints = false
+	return board
 }
 
 // FromString populates a new empty board with the values extracted from a string representation of the board.
-func FromString(s string) (*Board, error) {
-	board := NewBoard()
+func FromString(s string, isFauxBoard bool) (*Board, error) {
+	var board *Board
+
+	if isFauxBoard {
+		board = NewFauxBoard()
+	} else {
+		board = NewBoard()
+	}
+
 	valuesOnly, err := filterCandidates(s)
 
 	if err != nil {
@@ -115,6 +133,11 @@ func filterCandidates(s string) (string, error) {
 	return sb.String(), nil
 }
 
+// IsFaux returns true if the board was created as a faux board (i.e. with constraints enforcement turned off)
+func (b *Board) IsFaux() bool {
+	return b.enforceConstraints == false
+}
+
 // ToString extracts a string representation from the current state of a board.
 // The Board is read left to right, top to bottom, where each value is represented as is, and the candidates are prefixed with CandidatePrefixRune.
 func (b *Board) ToString(withCandidates bool) string {
@@ -152,6 +175,10 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 	}
 
 	b.Cells[c.Row][c.Col].value = value
+
+	if b.enforceConstraints == false {
+		return nil
+	}
 
 	if value == EmptyCell {
 		b.Cells[c.Row][c.Col].candidates = AllCandidates
@@ -199,11 +226,11 @@ func (b *Board) GetState() State {
 
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			c := NewCoordinates(row, col)
+			c, _ := NewCoordinates(row, col)
 			cell := b.Cells[c.Row][c.Col]
 
 			if cell.value == EmptyCell {
-				if cell.candidates == NoCandidates {
+				if cell.candidates == NoCandidates && b.enforceConstraints {
 					return Invalid
 				}
 
@@ -265,7 +292,8 @@ func (b *Board) recalculateCandidateSets() {
 			cell := b.Cells[row][col]
 
 			if cell.value != EmptyCell {
-				b.propagateConstraints(NewCoordinates(row, col), cell.value)
+				c, _ := NewCoordinates(row, col)
+				b.propagateConstraints(c, cell.value)
 			}
 		}
 	}

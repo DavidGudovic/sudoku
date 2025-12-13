@@ -1,6 +1,9 @@
 package board
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 const (
 	EmptyCell = 0
@@ -34,36 +37,43 @@ type Cell struct {
 }
 
 // NewCoordinates creates a new Coordinates struct
-func NewCoordinates(row, col int) Coordinates {
+func NewCoordinates(row, col int) (Coordinates, error) {
+	if row < 0 || row >= Size || col < 0 || col >= Size {
+		return Coordinates{}, ErrIndexOutOfBounds
+	}
+
 	return Coordinates{
 		Row: row,
 		Col: col,
-	}
+	}, nil
 }
 
 // CoordsFromIndex converts a 0-based index (left to right, top to bottom) to Coordinates.
 func CoordsFromIndex(index int) (Coordinates, error) {
 	if index < 0 || index >= CellCount {
-		return NewCoordinates(0, 0), ErrIndexOutOfBounds
+		return Coordinates{}, ErrIndexOutOfBounds
 	}
 
-	return NewCoordinates(index/Size, index%Size), nil
+	c, _ := NewCoordinates(index/Size, index%Size)
+	return c, nil
 }
 
 // CoordsFromBoxIndex converts a box index (0-8) and position within the box (0-8) to Coordinates.
 func CoordsFromBoxIndex(boxIndex int, positionInBox int) (Coordinates, error) {
 	if boxIndex < 0 || boxIndex >= BoxCount {
-		return NewCoordinates(0, 0), ErrIndexOutOfBounds
+		return Coordinates{}, ErrIndexOutOfBounds
 	}
 
 	if positionInBox < 0 || positionInBox >= BoxSize*BoxSize {
-		return NewCoordinates(0, 0), ErrIndexOutOfBounds
+		return Coordinates{}, ErrIndexOutOfBounds
 	}
 
 	row := (boxIndex/BoxSize)*BoxSize + (positionInBox / BoxSize)
 	col := (boxIndex%BoxSize)*BoxSize + (positionInBox % BoxSize)
 
-	return NewCoordinates(row, col), nil
+	c, _ := NewCoordinates(row, col)
+
+	return c, nil
 }
 
 // NewCell creates a new Cell with an EmptyCell value and AllCandidates available.
@@ -80,7 +90,7 @@ func (c Coordinates) BoxIndex() int {
 }
 
 func (c Coordinates) String() string {
-	return "(" + string(rune(c.Row+'0')) + ", " + string(rune(c.Col+'0')) + ")"
+	return fmt.Sprintf("R%dC%d", c.Row, c.Col)
 }
 
 // Contains checks if the CandidateSet contains the specified candidate value.

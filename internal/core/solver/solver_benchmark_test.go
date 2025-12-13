@@ -29,7 +29,7 @@ func BenchmarkBruteForceSolver(b *testing.B) {
 
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
-			original, _ := board.FromString(bm.puzzle)
+			original, _ := board.FromString(bm.puzzle, false)
 
 			b.ReportAllocs()
 			b.ResetTimer()

@@ -39,7 +39,7 @@ func TestBruteForceSolver(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b, _ := board.FromString(tt.puzzle)
+			b, _ := board.FromString(tt.puzzle, false)
 			boardAfterAttempt, _, err := solver.Solve(*b)
 
 			if tt.wantSolved {

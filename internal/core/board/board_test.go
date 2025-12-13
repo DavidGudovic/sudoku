@@ -41,7 +41,7 @@ func TestBoard_GetState(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			board, _ := FromString(tt.board)
+			board, _ := FromString(tt.board, false)
 			assert.Equal(t, tt.want, board.GetState())
 		})
 	}
@@ -136,7 +136,7 @@ func TestBoard_GetSetValue(t *testing.T) {
 
 func TestBoard_SerializeSerializer(t *testing.T) {
 	board := NewBoard()
-	newBoard, err := FromString(board.ToString(true))
+	newBoard, err := FromString(board.ToString(true), false)
 
 	assert.NoError(t, err)
 	assert.Equal(t, newBoard, board)
