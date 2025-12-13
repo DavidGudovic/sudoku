@@ -83,6 +83,38 @@ func FromString(s string) (*Board, error) {
 	return board, nil
 }
 
+// filterCandidates removes candidate prefixes from the string representation of a board,
+// returning only the values as a string.
+// It returns an error if the string representation is invalid.
+func filterCandidates(s string) (string, error) {
+	var sb strings.Builder
+	isCandidate := false
+
+	for _, ch := range s {
+		if isCandidate {
+			isCandidate = false
+			continue
+		}
+
+		if ch == CandidatePrefixRune {
+			isCandidate = true
+			continue
+		}
+
+		if ch < EmptyCell+'0' || ch > MaxValue+'0' {
+			return "", ErrInvalidRuneInStringRep
+		}
+
+		sb.WriteRune(ch)
+	}
+
+	if isCandidate {
+		return "", ErrInvalidStringRep
+	}
+
+	return sb.String(), nil
+}
+
 // ToString extracts a string representation from the current state of a board.
 // The Board is read left to right, top to bottom, where each value is represented as is, and the candidates are prefixed with CandidatePrefixRune.
 func (b *Board) ToString(withCandidates bool) string {

@@ -19,12 +19,14 @@ type SudokuSolver struct {
 	techniques []techniques.Technique
 }
 
+// NewSudokuSolver creates a SudokuSolver with the specified techniques.
 func NewSudokuSolver(techniques []techniques.Technique) *SudokuSolver {
 	return &SudokuSolver{
 		techniques: techniques,
 	}
 }
 
+// NewBruteForceSolver creates a SudokuSolver that uses only the backtracking technique.
 func NewBruteForceSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
@@ -33,6 +35,7 @@ func NewBruteForceSolver() *SudokuSolver {
 	}
 }
 
+// NewLogicalSolver creates a SudokuSolver that uses a set of human-like logical techniques.
 func NewLogicalSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
@@ -47,6 +50,8 @@ func NewLogicalSolver() *SudokuSolver {
 	}
 }
 
+// Solve attempts to solve the given Sudoku puzzle using the configured techniques.
+// It returns the solved board, a list of steps taken to solve it, or an error if unsolvable.
 func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step, error) {
 	var steps []techniques.Step
 
@@ -66,7 +71,6 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 				progressMade = true // If any technique made progress, the puzzle is still solvable
 
 				if step.PlacedValue != nil {
-					s.PropagateCandidates(&puzzle)
 					break // Previous (cheaper) techniques may now be applicable
 				}
 			}
@@ -84,8 +88,4 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, []techniques.Step
 	}
 
 	return puzzle, nil, ErrUnsolvablePuzzle
-}
-
-func (s *SudokuSolver) PropagateCandidates(_ *board.Board) {
-	// TODO: Implement
 }
