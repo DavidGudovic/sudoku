@@ -121,13 +121,11 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 
 	b.Cells[c.Row][c.Col].value = value
 
-	// Clearing a cell
 	if value == EmptyCell {
 		b.Cells[c.Row][c.Col].candidates = AllCandidates
-		b.applyConstraints(c)
+		b.recalculateCandidateSets()
 	}
 
-	// Setting a cell
 	if value != EmptyCell {
 		b.Cells[c.Row][c.Col].candidates = NoCandidates
 		b.propagateConstraints(c, value)
@@ -205,31 +203,6 @@ func (b *Board) resolveValidState(rows, cols, boxes [Size]CandidateSet) State {
 	return Solved
 }
 
-// applyConstraints recalculates the CandidateSet for the given Coordinates
-func (b *Board) applyConstraints(c Coordinates) {
-	cell := &b.Cells[c.Row][c.Col]
-	boxIndex := c.BoxIndex()
-
-	if cell.value != EmptyCell {
-		cell.candidates = NoCandidates
-		return
-	}
-
-	cell.candidates = AllCandidates
-	usedValues := NoCandidates
-
-	for i := 0; i < Size; i++ {
-		_ = usedValues.Add(b.Cells[c.Row][i].value)
-		_ = usedValues.Add(b.Cells[i][c.Col].value)
-
-		bc, _ := CoordsFromBoxIndex(boxIndex, i)
-		_ = usedValues.Add(b.Cells[bc.Row][bc.Col].value)
-	}
-
-	usedValues.Remove(0)
-	cell.candidates.Exclude(usedValues)
-}
-
 // propagateConstraints removes the given value from the CandidateSet of all Cells in the same row, column, and box as the given Coordinates
 func (b *Board) propagateConstraints(c Coordinates, value int) {
 	boxIndex := c.BoxIndex()
@@ -240,5 +213,28 @@ func (b *Board) propagateConstraints(c Coordinates, value int) {
 
 		bc, _ := CoordsFromBoxIndex(boxIndex, i)
 		b.Cells[bc.Row][bc.Col].candidates.Remove(value)
+	}
+}
+
+// recalculateCandidateSets recalculates the CandidateSet for the Cells
+func (b *Board) recalculateCandidateSets() {
+	// Reset candidates for all empty cells
+	for row := 0; row < Size; row++ {
+		for col := 0; col < Size; col++ {
+			if b.Cells[row][col].value == EmptyCell {
+				b.Cells[row][col].candidates = AllCandidates
+			}
+		}
+	}
+
+	// Re-apply constraints based on current cell values
+	for row := 0; row < Size; row++ {
+		for col := 0; col < Size; col++ {
+			cell := b.Cells[row][col]
+
+			if cell.value != EmptyCell {
+				b.propagateConstraints(NewCoordinates(row, col), cell.value)
+			}
+		}
 	}
 }

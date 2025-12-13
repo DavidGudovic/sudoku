@@ -53,7 +53,6 @@ func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 
 // backtrackSolve implements the backtracking algorithm to solve the Sudoku puzzle.
 // It recursively fills empty cells with candidate values and backtracks upon encountering invalid states.
-// TODO optimize with constraint propagation
 func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, error) {
 	c, err := bt.findEmptyCell(puzzle)
 
