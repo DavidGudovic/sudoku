@@ -24,6 +24,10 @@ type backtrackStats struct {
 func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
 
+	if puzzle.IsFaux() && puzzle.GetState() == board.Invalid {
+		return Step{}, ErrCannotSolve
+	}
+
 	start := time.Now()
 	solvedPuzzle, err := bt.backtrackSolve(*puzzle, &stats)
 	elapsed := time.Since(start)
@@ -61,7 +65,7 @@ func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats)
 	}
 
 	for val := board.MinValue; val <= board.MaxValue; val++ {
-		if puzzle.Cells[c.Row][c.Col].ContainsCandidate(val) == false {
+		if !puzzle.IsFaux() && puzzle.Cells[c.Row][c.Col].ContainsCandidate(val) == false {
 			continue
 		}
 

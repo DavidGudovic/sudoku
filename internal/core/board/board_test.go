@@ -170,41 +170,47 @@ func TestBoard_IsFaux(t *testing.T) {
 
 func TestBoard_ConstraintEnforcement(t *testing.T) {
 	tests := []struct {
-		name                 string
-		board                *Board
-		setValue             struct{ row, col, value int }
-		checkCell            struct{ row, col int }
-		wantCandidateRemoved bool
+		name        string
+		board       *Board
+		setValue    struct{ row, col, value int }
+		checkCell   struct{ row, col int }
+		isFauxBoard bool
 	}{
 		{
-			name:                 "Normal board enforces constraints",
-			board:                NewBoard(),
-			setValue:             struct{ row, col, value int }{0, 0, 5},
-			checkCell:            struct{ row, col int }{0, 1},
-			wantCandidateRemoved: true,
+			name:        "Normal board enforces constraints",
+			board:       NewBoard(),
+			setValue:    struct{ row, col, value int }{0, 0, 5},
+			checkCell:   struct{ row, col int }{0, 1},
+			isFauxBoard: false,
 		},
 		{
-			name:                 "Faux board does not enforce constraints",
-			board:                NewFauxBoard(),
-			setValue:             struct{ row, col, value int }{0, 0, 5},
-			checkCell:            struct{ row, col int }{0, 1},
-			wantCandidateRemoved: false,
+			name:        "Faux board does not enforce constraints",
+			board:       NewFauxBoard(),
+			setValue:    struct{ row, col, value int }{0, 0, 5},
+			checkCell:   struct{ row, col int }{0, 1},
+			isFauxBoard: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c, _ := NewCoordinates(tt.setValue.row, tt.setValue.col)
+			cc, _ := NewCoordinates(tt.setValue.row+1, tt.checkCell.col)
 			err := tt.board.SetValueOnCoords(c, tt.setValue.value)
 			assert.NoError(t, err)
 
 			checkCell := tt.board.Cells[tt.checkCell.row][tt.checkCell.col]
 			hasCandidate := checkCell.ContainsCandidate(tt.setValue.value)
 
-			if tt.wantCandidateRemoved {
-				assert.False(t, hasCandidate)
-			} else {
+			err = tt.board.SetValueOnCoords(cc, tt.setValue.value)
+
+			if tt.isFauxBoard {
+				assert.NoError(t, err)
 				assert.True(t, hasCandidate)
+			} else {
+				assert.Error(t, err)
+				assert.Equal(t, err, ErrValueNotACandidate)
+				assert.False(t, hasCandidate)
 			}
 		})
 	}
