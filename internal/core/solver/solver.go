@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/DavidGudovic/sudoku/internal/core/board"
-	"github.com/DavidGudovic/sudoku/internal/core/solver/techniques"
+	"github.com/DavidGudovic/sudoku/internal/core/techniques"
 )
 
 var (
