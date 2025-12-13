@@ -9,12 +9,12 @@ type Technique interface {
 }
 
 type Step struct {
-	Description       string
-	Technique         string
-	AffectedCells     []board.Coordinates
-	ReasonCells       []board.Coordinates
-	RemovedCandidates board.CandidateSet
-	PlacedValue       *int
+	Description       string              `json:"description"`
+	Technique         string              `json:"technique"`
+	AffectedCells     []board.Coordinates `json:"affectedCells,omitempty"`
+	ReasonCells       []board.Coordinates `json:"reasonCells,omitempty"`
+	RemovedCandidates board.CandidateSet  `json:"removedCandidates,omitempty"`
+	PlacedValue       *int                `json:"placedValue,omitempty"`
 }
 
 func (s Step) MadeProgress() bool {
