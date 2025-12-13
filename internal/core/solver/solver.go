@@ -41,12 +41,14 @@ func NewLogicalSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
 			techniques.NakedSingle{},
+			techniques.LastDigit{},
 			techniques.HiddenSingle{},
 			techniques.NakedPair{},
 			techniques.HiddenPair{},
 			techniques.PointingPair{},
 			techniques.XWing{},
 			techniques.Skyscraper{},
+			techniques.TwoStringKite{},
 		},
 	}
 }

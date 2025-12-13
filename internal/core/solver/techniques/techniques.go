@@ -25,6 +25,7 @@ func (s Step) MadeProgress() bool {
 
 type (
 	NakedSingle   struct{}
+	LastDigit     struct{}
 	HiddenSingle  struct{}
 	NakedPair     struct{}
 	HiddenPair    struct{}
