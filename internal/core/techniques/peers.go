@@ -263,3 +263,68 @@ func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
 
 	return seen
 }
+
+// ContainingCandidates filters the PeerSet to only include cells that contain any of the specified candidates on the given board.Board.
+func (ps PeerSet) ContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
+	result := NoCells
+
+	coords := ps.Slice()
+
+	for _, c := range coords {
+		cellCandidates := p.CellAt(c).Candidates()
+
+		if cellCandidates.Intersection(candidates) != board.NoCandidates {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// NotContainingCandidates filters the PeerSet to only include cells that do not contain any of the specified candidates on the given board.Board.
+func (ps PeerSet) NotContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
+	result := NoCells
+
+	coords := ps.Slice()
+	for _, c := range coords {
+		cellCandidates := p.CellAt(c).Candidates()
+
+		if cellCandidates.Intersection(candidates) == board.NoCandidates {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// ContainingExactCandidates filters the PeerSet to only include cells that contain exactly the specified candidates on the given board.Board.
+func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
+	result := NoCells
+
+	coords := ps.Slice()
+	for _, c := range coords {
+		cellCandidates := p.CellAt(c).Candidates()
+
+		if cellCandidates.Intersection(candidates) == cellCandidates {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// NotContainingExactCandidates filters the PeerSet to only include cells that do not contain exactly the specified candidates on the given board.Board.
+func (ps PeerSet) NotContainingExactCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
+	result := NoCells
+
+	coords := ps.Slice()
+	for _, c := range coords {
+		cellCandidates := p.CellAt(c).Candidates()
+
+		if cellCandidates.Intersection(candidates) != cellCandidates {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}

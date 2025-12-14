@@ -32,5 +32,11 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 }
 
 func NakedPair(_ *board.Board) (Step, error) {
+	for row := 0; row < 9; row++ {
+		for col := 0; col < 9; col++ {
+			_ = board.Coordinates{}
+			_ = board.NoCandidates
+		}
+	}
 	return Step{}, nil
 }

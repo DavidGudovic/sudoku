@@ -139,6 +139,11 @@ func (cs *CandidateSet) Merge(other CandidateSet) {
 	*cs |= other
 }
 
+// Intersection returns a new CandidateSet that is the intersection of the current CandidateSet and another CandidateSet.
+func (cs *CandidateSet) Intersection(other CandidateSet) CandidateSet {
+	return *cs & other
+}
+
 // Count returns the number of candidates in a CandidateSet
 func (cs *CandidateSet) Count() int {
 	return bits.OnesCount16(uint16(*cs))

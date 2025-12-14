@@ -89,10 +89,10 @@ func TestTechniques(t *testing.T) {
 		{
 			name:           "NakedPair (Progress)",
 			technique:      NakedPair,
-			board:          "904170806700086009826059007007905200502807693089020574070008002260704000498030760",
+			board:          "000000050802000017600910240070401089408000130000805000914082000300000000000040090",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Naked Pair found at R3C7 and R3C8, removing candidates from peers",
+				Description:       "Naked Pair found at R7C1 and R8C1, removing candidates from peers",
 				Technique:         "NakedPair",
 				AffectedCells:     []board.Coordinates{{Row: 3, Col: 7}, {Row: 3, Col: 8}},
 				ReasonCells:       AllPeersOf(board.Coordinates{Row: 3, Col: 7}, board.Coordinates{Row: 3, Col: 8}).Slice(),
