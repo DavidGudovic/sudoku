@@ -13,7 +13,7 @@ type backtrackStats struct {
 	backtracks int
 }
 
-// Backtracking attempts to solve the puzzle using backtracking.
+// Backtracking algorithm attempts to solve the puzzle using brute force.
 // It does not produce incremental steps but returns the solved puzzle if successful.
 func Backtracking(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
