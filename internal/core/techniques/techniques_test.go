@@ -94,9 +94,9 @@ func TestTechniques(t *testing.T) {
 			expecting: Step{
 				Description:       "Naked Pair found at R7C1 and R8C1, removing candidates from peers",
 				Technique:         "NakedPair",
-				AffectedCells:     []board.Coordinates{{Row: 3, Col: 7}, {Row: 3, Col: 8}},
-				ReasonCells:       AllPeersOf(board.Coordinates{Row: 3, Col: 7}, board.Coordinates{Row: 3, Col: 8}).Slice(),
-				RemovedCandidates: 0b0001100000,
+				AffectedCells:     []board.Coordinates{{Row: 4, Col: 1}, {Row: 5, Col: 1}},
+				ReasonCells:       []board.Coordinates{{Row: 7, Col: 1}, {Row: 8, Col: 1}},
+				RemovedCandidates: 0b0100000100,
 			},
 		},
 		{
