@@ -14,7 +14,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 			candidates := cell.Candidates()
 
 			if candidates.Count() == 1 {
-				val := candidates.ToSlice()[0]
+				val := candidates.Slice()[0]
 				step := Step{
 					Technique:         "NakedSingle",
 					AffectedCells:     []board.Coordinates{coords},
