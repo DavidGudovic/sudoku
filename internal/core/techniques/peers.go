@@ -220,3 +220,30 @@ func AllPeersOf(coords ...board.Coordinates) PeerSet {
 
 	return ps.Excluding(coords...)
 }
+
+// Except returns a new PeerSet excluding the given PeerSet
+func (ps PeerSet) Except(other PeerSet) PeerSet {
+	result := NoCells
+
+	for r := 0; r < board.Size; r++ {
+		result[r] = ps[r] &^ other[r]
+	}
+
+	return result
+}
+
+// Intersection returns a new PeerSet that is the intersection of this set and another.
+func (ps PeerSet) Intersection(other PeerSet) PeerSet {
+	result := NoCells
+
+	for r := 0; r < board.Size; r++ {
+		result[r] = ps[r] & other[r]
+	}
+
+	return result
+}
+
+// IsEmpty checks if the PeerSet is empty.
+func (ps PeerSet) IsEmpty() bool {
+	return ps == NoCells
+}
