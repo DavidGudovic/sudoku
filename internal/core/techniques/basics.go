@@ -6,10 +6,10 @@ import (
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
-// Apply LastDigit technique:
+// LastDigit technique:
 //
 // If a candidate can only fit in one cell of a row, column, or box, place it there.
-func (ld LastDigit) Apply(puzzle *board.Board) (Step, error) {
+func LastDigit(puzzle *board.Board) (Step, error) {
 	var candidates board.CandidateSet
 	var coords board.Coordinates
 	var val int
@@ -59,6 +59,6 @@ func (ld LastDigit) Apply(puzzle *board.Board) (Step, error) {
 	return Step{}, nil
 }
 
-func (pp PointingPair) Apply(_ *board.Board) (Step, error) {
+func PointingPair(_ *board.Board) (Step, error) {
 	return Step{}, nil
 }

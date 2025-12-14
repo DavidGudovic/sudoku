@@ -9,6 +9,14 @@ type Technique interface {
 	Apply(puzzle *board.Board) (Step, error)
 }
 
+// Func is a function type that implements the Technique interface
+// This allows simple functions to be used as techniques
+type Func func(*board.Board) (Step, error)
+
+func (tf Func) Apply(puzzle *board.Board) (Step, error) {
+	return tf(puzzle)
+}
+
 // Step represents a single solving step taken by a technique
 type Step struct {
 	Description       string
@@ -28,18 +36,6 @@ func (s Step) MadeProgress() bool {
 
 // PeerCoordinates represents a slice of board coordinates that are peers to a given cell
 type PeerCoordinates []board.Coordinates
-
-type (
-	NakedSingle   struct{}
-	LastDigit     struct{}
-	HiddenSingle  struct{}
-	NakedPair     struct{}
-	HiddenPair    struct{}
-	PointingPair  struct{}
-	XWing         struct{}
-	Skyscraper    struct{}
-	TwoStringKite struct{}
-)
 
 // Excluding removes the given coordinates from the PeerCoordinates slice
 func (p PeerCoordinates) Excluding(coords board.Coordinates) PeerCoordinates {

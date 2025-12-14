@@ -12,16 +12,14 @@ var (
 	ErrCannotSolve = errors.New("cannot backtrack further; puzzle is unsolvable")
 )
 
-type Backtracking struct{}
-
 type backtrackStats struct {
 	guesses    int
 	backtracks int
 }
 
-// Apply attempts to solve the puzzle using backtracking.
+// Backtracking attempts to solve the puzzle using backtracking.
 // It does not produce incremental steps but returns the solved puzzle if successful.
-func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
+func Backtracking(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
 
 	if puzzle.IsFaux() && puzzle.GetState() == board.Invalid {
@@ -29,7 +27,7 @@ func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 	}
 
 	start := time.Now()
-	solvedPuzzle, err := bt.backtrackSolve(*puzzle, &stats)
+	solvedPuzzle, err := backtrackSolve(*puzzle, &stats)
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -57,8 +55,8 @@ func (bt Backtracking) Apply(puzzle *board.Board) (Step, error) {
 
 // backtrackSolve implements the backtracking algorithm to solve the Sudoku puzzle.
 // It recursively fills empty cells with candidate values and backtracks upon encountering invalid states.
-func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, error) {
-	c, err := bt.findEmptyCell(puzzle)
+func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, error) {
+	c, err := findEmptyCell(puzzle)
 
 	if err != nil {
 		return puzzle, nil
@@ -79,7 +77,7 @@ func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats)
 		case board.Solved:
 			return puzzle, nil
 		default:
-			solvedPuzzle, err := bt.backtrackSolve(puzzle, stats)
+			solvedPuzzle, err := backtrackSolve(puzzle, stats)
 
 			if err == nil {
 				return solvedPuzzle, nil
@@ -95,7 +93,7 @@ func (bt Backtracking) backtrackSolve(puzzle board.Board, stats *backtrackStats)
 
 // findEmptyCell is a helper that returns the coordinates of the first empty cell found in the puzzle.
 // Searches left to right, top to bottom.
-func (bt Backtracking) findEmptyCell(puzzle board.Board) (board.Coordinates, error) {
+func findEmptyCell(puzzle board.Board) (board.Coordinates, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
 			if puzzle.Cells[row][col].Value() == board.EmptyCell {

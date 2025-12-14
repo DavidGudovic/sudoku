@@ -31,7 +31,7 @@ func NewSudokuSolver(techniques []techniques.Technique) *SudokuSolver {
 func NewBruteForceSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
-			techniques.Backtracking{},
+			techniques.Func(techniques.Backtracking),
 		},
 	}
 }
@@ -40,15 +40,15 @@ func NewBruteForceSolver() *SudokuSolver {
 func NewLogicalSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
-			techniques.NakedSingle{},
-			techniques.LastDigit{},
-			techniques.HiddenSingle{},
-			techniques.NakedPair{},
-			techniques.HiddenPair{},
-			techniques.PointingPair{},
-			techniques.XWing{},
-			techniques.Skyscraper{},
-			techniques.TwoStringKite{},
+			techniques.Func(techniques.LastDigit),
+			techniques.Func(techniques.NakedSingle),
+			techniques.Func(techniques.HiddenSingle),
+			techniques.Func(techniques.NakedPair),
+			techniques.Func(techniques.HiddenPair),
+			techniques.Func(techniques.PointingPair),
+			techniques.Func(techniques.XWing),
+			techniques.Func(techniques.Skyscraper),
+			techniques.Func(techniques.TwoStringKite),
 		},
 	}
 }

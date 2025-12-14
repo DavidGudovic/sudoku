@@ -11,13 +11,13 @@ import (
 func TestTechniques(t *testing.T) {
 	tests := []struct {
 		name      string
-		technique Technique
+		technique Func
 		expecting Step
 		board     string
 	}{
 		{
 			name:      "LastDigit (Row)",
-			technique: LastDigit{},
+			technique: LastDigit,
 			board:     "000000000000000000000000000000000000123406789000000000000000000000000000000000000",
 			expecting: Step{
 				Description:   "Value 5 can only go in one place in Row 4, placing a 5 at R4C4",
@@ -34,7 +34,7 @@ func TestTechniques(t *testing.T) {
 		},
 		{
 			name:      "LastDigit (Column)",
-			technique: LastDigit{},
+			technique: LastDigit,
 			board:     "000600000000500000000700000000000000000100000000300000000900000000200000000800000",
 			expecting: Step{
 				Description:   "Value 4 can only go in one place in Col 3, placing a 4 at R3C3",
@@ -51,7 +51,7 @@ func TestTechniques(t *testing.T) {
 		},
 		{
 			name:      "LastDigit (Box)",
-			technique: LastDigit{},
+			technique: LastDigit,
 			board:     "000000000000000000000000000000123000000604000000789000000000000000000000000000000",
 			expecting: Step{
 				Description:   "Value 5 can only go in one place in Box 4, placing a 5 at R4C4",
