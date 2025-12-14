@@ -16,7 +16,7 @@ func (ld LastDigit) Apply(puzzle *board.Board) (Step, error) {
 
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			coords, _ = board.NewCoordinates(col, row)
+			coords, _ = board.NewCoordinates(row, col)
 			candidates = puzzle.CellAt(coords).Candidates()
 
 			if candidates.Count() == 1 {
