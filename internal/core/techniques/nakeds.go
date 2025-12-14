@@ -23,6 +23,13 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 					PlacedValue:       &val,
 					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
 				}
+
+				err := puzzle.SetValueOnCoords(coords, val)
+
+				if err != nil {
+					panic("Impossible: " + err.Error())
+				}
+
 				return step, nil
 			}
 		}

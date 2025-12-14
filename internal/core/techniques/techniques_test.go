@@ -121,9 +121,21 @@ func TestTechniques(t *testing.T) {
 				return
 			}
 
+			// Should have made progress with no errors and an appropriate step
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expecting, step)
 			assert.True(t, step.MadeProgress())
+
+			// Should have affected the expected cells with correct placements/removals
+			for _, affected := range step.AffectedCells {
+				cell := b.Cells[affected.Row][affected.Col]
+				if step.PlacedValue != nil {
+					assert.Equal(t, *step.PlacedValue, cell.Value())
+				} else {
+					removedCandidates := cell.Candidates() & step.RemovedCandidates
+					assert.Equal(t, 0, removedCandidates)
+				}
+			}
 		})
 	}
 }

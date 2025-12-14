@@ -34,22 +34,32 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 				columnPeers := ColumnPeersOf(coords)
 				boxPeers := BoxPeersOf(coords)
 
+				found := false
+
 				if rowPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					found = true
 					step.Technique += " (Row)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Row ", coords.Row, ", placing a ", val, " at ", coords)
 					step.ReasonCells = rowPeers.Slice()
-					return step, nil
-				}
-				if columnPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+				} else if columnPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					found = true
 					step.Technique += " (Column)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Col ", coords.Col, ", placing a ", val, " at ", coords)
 					step.ReasonCells = columnPeers.Slice()
-					return step, nil
-				}
-				if boxPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+				} else if boxPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					found = true
 					step.Technique += " (Box)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Box ", coords.BoxIndex(), ", placing a ", val, " at ", coords)
 					step.ReasonCells = boxPeers.Slice()
+				}
+
+				if found {
+					err := puzzle.SetValueOnCoords(coords, val)
+
+					if err != nil {
+						panic("Impossible: " + err.Error())
+					}
+
 					return step, nil
 				}
 			}
