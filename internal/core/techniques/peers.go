@@ -247,3 +247,19 @@ func (ps PeerSet) Intersection(other PeerSet) PeerSet {
 func (ps PeerSet) IsEmpty() bool {
 	return ps == NoCells
 }
+
+// Candidates returns the union of candidates from all board.Cell's in this PeerSet on a given board.Board.
+func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
+	seen := board.NoCandidates
+
+	for row := 0; row < board.Size; row++ {
+		for col := 0; col < board.Size; col++ {
+			if ps[row]&(1<<col) != 0 {
+				coords, _ := board.NewCoordinates(row, col)
+				seen.Merge(p.CellAt(coords).Candidates())
+			}
+		}
+	}
+
+	return seen
+}

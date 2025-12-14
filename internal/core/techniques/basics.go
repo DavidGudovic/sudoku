@@ -20,10 +20,6 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 			candidates = puzzle.CellAt(coords).Candidates()
 
 			if candidates.Count() == 1 {
-				rCandidates := rowCandidates(*puzzle, row)
-				cCandidates := columnCandidates(*puzzle, col)
-				bCandidates := boxCandidates(*puzzle, coords)
-
 				val = candidates.ToSlice()[0]
 				targetCellCandidates, _ := board.NewCandidateSet(val)
 
@@ -34,22 +30,26 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 					PlacedValue:       &val,
 				}
 
-				if rCandidates == targetCellCandidates {
-					step.Technique = step.Technique + " (Row)"
+				rowPeers := RowPeersOf(coords)
+				columnPeers := ColumnPeersOf(coords)
+				boxPeers := BoxPeersOf(coords)
+
+				if rowPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					step.Technique += " (Row)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Row ", coords.Row, ", placing a ", val, " at ", coords)
-					step.ReasonCells = RowPeersOf(coords).Slice()
+					step.ReasonCells = rowPeers.Slice()
 					return step, nil
 				}
-				if cCandidates == targetCellCandidates {
-					step.Technique = step.Technique + " (Column)"
+				if columnPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					step.Technique += " (Column)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Col ", coords.Col, ", placing a ", val, " at ", coords)
-					step.ReasonCells = ColumnPeersOf(coords).Slice()
+					step.ReasonCells = columnPeers.Slice()
 					return step, nil
 				}
-				if bCandidates == targetCellCandidates {
-					step.Technique = step.Technique + " (Box)"
+				if boxPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
+					step.Technique += " (Box)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Box ", coords.BoxIndex(), ", placing a ", val, " at ", coords)
-					step.ReasonCells = BoxPeersOf(coords).Slice()
+					step.ReasonCells = boxPeers.Slice()
 					return step, nil
 				}
 			}
