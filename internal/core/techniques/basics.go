@@ -56,7 +56,7 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 		}
 	}
 
-	return Step{}, nil
+	return Step{}, ErrCannotProgress
 }
 
 func PointingPair(_ *board.Board) (Step, error) {

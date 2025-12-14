@@ -27,7 +27,8 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 			}
 		}
 	}
-	return Step{}, nil
+	
+	return Step{}, ErrCannotProgress
 }
 
 func NakedPair(_ *board.Board) (Step, error) {

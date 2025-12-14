@@ -8,10 +8,6 @@ import (
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
-var (
-	ErrCannotSolve = errors.New("cannot backtrack further; puzzle is unsolvable")
-)
-
 type backtrackStats struct {
 	guesses    int
 	backtracks int

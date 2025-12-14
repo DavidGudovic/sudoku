@@ -1,7 +1,14 @@
 package techniques
 
 import (
+	"errors"
+
 	"github.com/DavidGudovic/sudoku/internal/core/board"
+)
+
+var (
+	ErrCannotProgress = errors.New("cannot progress in this step")
+	ErrCannotSolve    = errors.New("cannot solve in this step")
 )
 
 // Technique represents a Sudoku solving technique that can be applied to a puzzle
