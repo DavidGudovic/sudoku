@@ -92,11 +92,11 @@ func TestTechniques(t *testing.T) {
 			board:          "000524768784916235265700491047000006020807143000000927010070309070600014000301672",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Naked Pair found at R6C6 and R6C7, removing candidates from peers",
+				Description:       "Naked Pair found at R3C6 and R3C7, removing candidates 5,8 from peers",
 				Technique:         "NakedPair",
-				ReasonCells:       []board.Coordinates{{Row: 6, Col: 6}, {Row: 6, Col: 7}},
-				AffectedCells:     []board.Coordinates{{Row: 6, Col: 0}, {Row: 6, Col: 2}},
-				RemovedCandidates: 0b0100000000,
+				ReasonCells:       []board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 7}},
+				AffectedCells:     []board.Coordinates{{Row: 3, Col: 0}, {Row: 3, Col: 4}, {Row: 3, Col: 5}},
+				RemovedCandidates: 0b0100100000,
 			},
 		},
 		{
@@ -131,9 +131,11 @@ func TestTechniques(t *testing.T) {
 				cell := b.Cells[affected.Row][affected.Col]
 				if step.PlacedValue != nil {
 					assert.Equal(t, *step.PlacedValue, cell.Value())
-				} else {
-					removedCandidates := cell.Candidates() & step.RemovedCandidates
-					assert.Equal(t, 0, removedCandidates)
+				}
+
+				if step.RemovedCandidates != board.NoCandidates {
+					IntersectingCandidates := cell.Candidates() & step.RemovedCandidates
+					assert.Empty(t, IntersectingCandidates)
 				}
 			}
 		})

@@ -27,13 +27,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
 				}
 
-				err := puzzle.SetValueOnCoords(coords, val)
-
-				if err != nil {
-					panic("Impossible: " + err.Error())
-				}
-
-				return step, nil
+				return step.MustApplyTo(puzzle), nil
 			}
 		}
 	}
@@ -71,9 +65,15 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 				} else if found.SharesColumnWith(peer) {
 					affected = ColumnPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
 					pair = peer
-				} else if found.SharesBoxWith(peer) {
-					affected = BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+				}
+
+				if found.SharesBoxWith(peer) {
+					affected = affected.Union(BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer))
 					pair = peer
+				}
+
+				if !affected.IsEmpty() {
+					break
 				}
 			}
 
@@ -83,17 +83,13 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 
 			step := Step{
 				Technique:         "NakedPair",
-				Description:       fmt.Sprint("Naked Pair found at ", found, " and ", pair, ", removing candidates from peers"),
-				AffectedCells:     []board.Coordinates{found, pair},
-				ReasonCells:       affected.Slice(),
+				Description:       fmt.Sprint("Naked Pair found at ", found, " and ", pair, ", removing candidates ", candidates.String(), " from peers"),
+				AffectedCells:     affected.Slice(),
+				ReasonCells:       []board.Coordinates{found, pair},
 				RemovedCandidates: candidates,
 			}
 
-			for _, coords := range affected.Slice() {
-				puzzle.ExcludeCandidatesFromCoords(coords, candidates)
-			}
-
-			return step, nil
+			return step.MustApplyTo(puzzle), nil
 		}
 	}
 

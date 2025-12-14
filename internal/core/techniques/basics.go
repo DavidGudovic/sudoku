@@ -54,13 +54,7 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 				}
 
 				if found {
-					err := puzzle.SetValueOnCoords(coords, val)
-
-					if err != nil {
-						panic("Impossible: " + err.Error())
-					}
-
-					return step, nil
+					return step.MustApplyTo(puzzle), nil
 				}
 			}
 		}

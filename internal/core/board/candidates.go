@@ -1,6 +1,10 @@
 package board
 
-import "math/bits"
+import (
+	"math/bits"
+	"strconv"
+	"strings"
+)
 
 var (
 	AllCandidates CandidateSet = 0b1111111110
@@ -78,4 +82,19 @@ func (cs *CandidateSet) Slice() []int {
 	}
 
 	return values
+}
+
+// String converts the CandidateSet to a comma-separated list of integer values of the candidates.
+func (cs *CandidateSet) String() string {
+	sb := strings.Builder{}
+
+	for i, val := range cs.Slice() {
+		sb.WriteString(strconv.Itoa(val))
+
+		if i < len(cs.Slice())-1 {
+			sb.WriteString(",")
+		}
+	}
+
+	return sb.String()
 }

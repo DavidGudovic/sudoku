@@ -282,7 +282,7 @@ func (ps PeerSet) ContainingCandidates(p board.Board, candidates board.Candidate
 	return result
 }
 
-// NotContainingCandidates filters the PeerSet to only include cells that do not contain any of the specified candidates on the given board.Board.
+// NotContainingCandidates filters the PeerSet to only include cells that do not contain the specified candidates on the given board.Board.
 func (ps PeerSet) NotContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
 	result := NoCells
 
@@ -304,9 +304,9 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 
 	coords := ps.Slice()
 	for _, c := range coords {
-		cellCandidates := p.CellAt(c).Candidates()
+		target := p.CellAt(c).Candidates()
 
-		if cellCandidates.Intersection(candidates) == cellCandidates {
+		if target == candidates {
 			result = result.With(c)
 		}
 	}
