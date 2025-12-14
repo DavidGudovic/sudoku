@@ -57,8 +57,8 @@ func NewBoard() *Board {
 
 // NewFauxBoard initializes a Size*Size empty board with full candidates that does not enforce constraints when setting values.
 //
-// Used when the board is being populated from an external source (e.g. FromString) where the input may not adhere to Sudoku rules,
-// or when automatic constraints enforcement is not desired i.e. manual candidate management.
+// Used when the board is being populated from an external source (e.g., FromString) where the input may not adhere to Sudoku rules,
+// or when automatic constraints enforcement is not desired i.e., manual candidate management.
 func NewFauxBoard() *Board {
 	board := NewBoard()
 	board.enforcesConstraints = false
@@ -134,7 +134,7 @@ func filterCandidates(s string) (string, error) {
 	return sb.String(), nil
 }
 
-// IsFaux returns true if the board was created as a faux board (i.e. with constraints enforcement turned off)
+// IsFaux returns true if the board was created as a faux board (i.e., with constraints enforcement turned off)
 func (b *Board) IsFaux() bool {
 	return b.enforcesConstraints == false
 }
