@@ -1,3 +1,5 @@
 package main
 
-// Entry point for the API later
+func main() {
+	// Entry point for the API later
+}

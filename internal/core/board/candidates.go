@@ -87,11 +87,11 @@ func (cs *CandidateSet) Slice() []int {
 // String converts the CandidateSet to a comma-separated list of integer values of the candidates.
 func (cs *CandidateSet) String() string {
 	sb := strings.Builder{}
+	slice := cs.Slice()
 
-	for i, val := range cs.Slice() {
+	for i, val := range slice {
 		sb.WriteString(strconv.Itoa(val))
-
-		if i < len(cs.Slice())-1 {
+		if i < len(slice)-1 {
 			sb.WriteString(",")
 		}
 	}

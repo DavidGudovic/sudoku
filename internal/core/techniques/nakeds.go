@@ -55,24 +55,28 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 				continue
 			}
 
+			var rowAffected PeerSet
+			var colAffected PeerSet
+			var boxAffected PeerSet
 			var affected PeerSet
 			var pair board.Coordinates
 
 			for _, peer := range peers.Slice() {
 				if found.SharesRowWith(peer) {
-					affected = RowPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
-					pair = peer
-				} else if found.SharesColumnWith(peer) {
-					affected = ColumnPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
-					pair = peer
+					rowAffected = RowPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+				}
+
+				if found.SharesColumnWith(peer) {
+					colAffected = ColumnPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
 				}
 
 				if found.SharesBoxWith(peer) {
-					affected = affected.Union(BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer))
-					pair = peer
+					boxAffected = BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
 				}
 
-				if !affected.IsEmpty() {
+				if !rowAffected.IsEmpty() || !colAffected.IsEmpty() || !boxAffected.IsEmpty() {
+					affected = rowAffected.Union(colAffected).Union(boxAffected)
+					pair = peer
 					break
 				}
 			}
