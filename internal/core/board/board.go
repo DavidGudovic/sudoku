@@ -222,6 +222,11 @@ func (b *Board) GetValueByIndex(index int) (int, error) {
 	return b.CellAt(c).value, nil
 }
 
+// ExcludeCandidatesFromCoords provides a safe way for consumers to mutate candidates of a cell.
+func (b *Board) ExcludeCandidatesFromCoords(coords Coordinates, candidates CandidateSet) {
+	b.Cells[coords.Row][coords.Col].candidates.Exclude(candidates)
+}
+
 // CellAt returns the Cell at the given Coordinates
 func (b *Board) CellAt(coordinates Coordinates) Cell {
 	return b.Cells[coordinates.Row][coordinates.Col]

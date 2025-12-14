@@ -48,31 +48,54 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 func NakedPair(puzzle *board.Board) (Step, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			foundCoords, _ := board.NewCoordinates(row, col)
-
-			candidates := puzzle.CellAt(foundCoords).Candidates()
+			candidates := puzzle.CellAt(board.Coordinates{Row: row, Col: col}).Candidates()
 
 			if candidates.Count() != 2 {
 				continue
 			}
 
-			peers := AllPeersOf(foundCoords).ContainingExactCandidates(*puzzle, candidates)
+			found, _ := board.NewCoordinates(row, col)
+			peers := AllPeersOf(found).ContainingExactCandidates(*puzzle, candidates)
 
 			if peers.IsEmpty() {
 				continue
 			}
 
-			pairCoords := peers.Slice()[0]
+			var affected PeerSet
+			var pair board.Coordinates
 
-			if InSameRow(foundCoords, pairCoords) {
-				rowPeers := RowPeersOf(foundCoords).NotContainingCandidates(*puzzle, candidates)
-			} else if InSameColumn(foundCoords, pairCoords) {
-				rowPeers := ColumnPeersOf(foundCoords).NotContainingCandidates(*puzzle, candidates)
-			} else if InSameBox(foundCoords, pairCoords) {
-				rowPeers := BoxPeersOf(foundCoords).NotContainingCandidates(*puzzle, candidates)
+			for _, peer := range peers.Slice() {
+				if found.SharesRowWith(peer) {
+					affected = RowPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+					pair = peer
+				} else if found.SharesColumnWith(peer) {
+					affected = ColumnPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+					pair = peer
+				} else if found.SharesBoxWith(peer) {
+					affected = BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+					pair = peer
+				}
 			}
+
+			if affected.IsEmpty() {
+				continue
+			}
+
+			step := Step{
+				Technique:         "NakedPair",
+				Description:       fmt.Sprint("Naked Pair found at ", found, " and ", pair, ", removing candidates from peers"),
+				AffectedCells:     []board.Coordinates{found, pair},
+				ReasonCells:       affected.Slice(),
+				RemovedCandidates: candidates,
+			}
+
+			for _, coords := range affected.Slice() {
+				puzzle.ExcludeCandidatesFromCoords(coords, candidates)
+			}
+
+			return step, nil
 		}
 	}
 
-	return Step{}, nil
+	return Step{}, ErrCannotProgress
 }
