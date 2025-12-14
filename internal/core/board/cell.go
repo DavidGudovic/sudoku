@@ -3,6 +3,7 @@ package board
 import (
 	"errors"
 	"fmt"
+	"math/bits"
 )
 
 const (
@@ -76,6 +77,20 @@ func CoordsFromBoxIndex(boxIndex int, positionInBox int) (Coordinates, error) {
 	return c, nil
 }
 
+// NewCandidateSet creates a new CandidateSet from the provided values.
+func NewCandidateSet(values ...int) (CandidateSet, error) {
+	var cs CandidateSet
+
+	for _, val := range values {
+		err := cs.Add(val)
+		if err != nil {
+			return NoCandidates, err
+		}
+	}
+
+	return cs, nil
+}
+
 // NewCell creates a new Cell with an EmptyCell value and AllCandidates available.
 func NewCell() Cell {
 	return Cell{
@@ -122,6 +137,24 @@ func (cs *CandidateSet) Exclude(other CandidateSet) {
 // Merge adds all candidates present in the other CandidateSet to the current CandidateSet.
 func (cs *CandidateSet) Merge(other CandidateSet) {
 	*cs |= other
+}
+
+// Count returns the number of candidates in a CandidateSet
+func (cs *CandidateSet) Count() int {
+	return bits.OnesCount16(uint16(*cs))
+}
+
+// ToSlice converts the CandidateSet to a slice of integers representing the candidate values.
+func (cs *CandidateSet) ToSlice() []int {
+	var values []int
+
+	for val := MinValue; val <= MaxValue; val++ {
+		if cs.Contains(val) {
+			values = append(values, val)
+		}
+	}
+
+	return values
 }
 
 func (c Cell) Value() int {

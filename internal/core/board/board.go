@@ -219,7 +219,12 @@ func (b *Board) GetValueByIndex(index int) (int, error) {
 		return 0, err
 	}
 
-	return b.Cells[c.Row][c.Col].value, nil
+	return b.CellAt(c).value, nil
+}
+
+// CellAt returns the Cell at the given Coordinates
+func (b *Board) CellAt(coordinates Coordinates) Cell {
+	return b.Cells[coordinates.Row][coordinates.Col]
 }
 
 // GetState resolves the current state of the board into one of [ Invalid, Unsolved, Solved]
@@ -232,7 +237,7 @@ func (b *Board) GetState() State {
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
 			c, _ := NewCoordinates(row, col)
-			cell := b.Cells[c.Row][c.Col]
+			cell := b.CellAt(c)
 
 			if cell.value == EmptyCell {
 				if cell.candidates == NoCandidates && b.enforcesConstraints {
