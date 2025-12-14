@@ -52,7 +52,7 @@ func Backtracking(puzzle *board.Board) (Step, error) {
 // backtrackSolve implements the backtracking algorithm to solve the Sudoku puzzle.
 // It recursively fills empty cells with candidate values and backtracks upon encountering invalid states.
 func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, error) {
-	c, err := findEmptyCell(puzzle)
+	c, err := findSuitableCell(puzzle)
 
 	if err != nil {
 		return puzzle, nil
@@ -87,15 +87,33 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 	return puzzle, ErrCannotSolve
 }
 
-// findEmptyCell is a helper that returns the coordinates of the first empty cell found in the puzzle.
+// findSuitableCell is a helper that returns the coordinates of an empty cell with the least amount candidates
 // Searches left to right, top to bottom.
-func findEmptyCell(puzzle board.Board) (board.Coordinates, error) {
+func findSuitableCell(puzzle board.Board) (board.Coordinates, error) {
+	leastCandidates := 10 // Impossible value.
+	var bestCell board.Coordinates
+
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			if puzzle.Cells[row][col].Value() == board.EmptyCell {
+			if puzzle.Cells[row][col].Value() != board.EmptyCell {
+				continue
+			}
+
+			candidates := puzzle.CellAt(board.Coordinates{Row: row, Col: col}).Candidates()
+
+			if candidates.Count() == 1 {
 				return board.Coordinates{Row: row, Col: col}, nil
 			}
+
+			if candidates.Count() < leastCandidates {
+				leastCandidates = candidates.Count()
+				bestCell = board.Coordinates{Row: row, Col: col}
+			}
 		}
+	}
+
+	if leastCandidates != 10 {
+		return bestCell, nil
 	}
 
 	return board.Coordinates{}, errors.New("no empty cells found")
