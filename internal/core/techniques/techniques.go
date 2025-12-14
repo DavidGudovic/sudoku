@@ -37,31 +37,6 @@ func (s Step) MadeProgress() bool {
 	return s.PlacedValue != nil || s.RemovedCandidates != board.NoCandidates
 }
 
-// Equals compares two Steps for equality
-func (s Step) Equals(other Step) bool {
-	if s.Technique != other.Technique {
-		return false
-	}
-	if len(s.AffectedCells) != len(other.AffectedCells) {
-		return false
-	}
-	for i, c := range s.AffectedCells {
-		if c != other.AffectedCells[i] {
-			return false
-		}
-	}
-	if s.RemovedCandidates != other.RemovedCandidates {
-		return false
-	}
-	if (s.PlacedValue == nil) != (other.PlacedValue == nil) {
-		return false
-	}
-	if s.PlacedValue != nil && other.PlacedValue != nil && *s.PlacedValue != *other.PlacedValue {
-		return false
-	}
-	return true
-}
-
 // Excluding removes the given coordinates from the PeerCoordinates slice
 func (p PeerCoordinates) Excluding(coords board.Coordinates) PeerCoordinates {
 	var result PeerCoordinates
