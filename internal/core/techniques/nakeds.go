@@ -18,7 +18,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 				step := Step{
 					Technique:         "NakedSingle",
 					AffectedCells:     []board.Coordinates{coords},
-					ReasonCells:       allPeers(coords).Excluding(coords),
+					ReasonCells:       allPeers(coords).Slice(),
 					RemovedCandidates: candidates,
 					PlacedValue:       &val,
 					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
@@ -27,7 +27,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 			}
 		}
 	}
-	
+
 	return Step{}, ErrCannotProgress
 }
 
