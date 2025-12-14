@@ -79,6 +79,18 @@ func (c Coordinates) BoxIndex() int {
 	return (c.Row/BoxSize)*BoxSize + c.Col/BoxSize
 }
 
+func (c Coordinates) SharesRowWith(other Coordinates) bool {
+	return c.Row == other.Row
+}
+
+func (c Coordinates) SharesColumnWith(other Coordinates) bool {
+	return c.Col == other.Col
+}
+
+func (c Coordinates) SharesBoxWith(other Coordinates) bool {
+	return c.BoxIndex() == other.BoxIndex()
+}
+
 func (c Coordinates) String() string {
 	return fmt.Sprintf("R%dC%d", c.Row, c.Col)
 }
