@@ -29,8 +29,8 @@ var (
 )
 
 // State represents the current state of the board
-//   - Invalid is a board state where at least one row, column, or box contains duplicate values, or an EmptyCell contains NoCandidates
-//   - Unsolved is a valid board state where at least one Cell is an EmptyCell
+//   - Invalid is a board state where at least one row, column, or box contains duplicate values, or an EmptyCell contains NoCandidates.
+//   - Unsolved is a valid board state where at least one Cell is an EmptyCell.
 //   - Solved is a valid board state where all Cells are filled with values.
 type State int
 
