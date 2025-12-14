@@ -37,19 +37,19 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 				if rCandidates == targetCellCandidates {
 					step.Technique = step.Technique + " (Row)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Row ", coords.Row, ", placing a ", val, " at ", coords)
-					step.ReasonCells = rowPeers(coords).Slice()
+					step.ReasonCells = RowPeersOf(coords).Slice()
 					return step, nil
 				}
 				if cCandidates == targetCellCandidates {
 					step.Technique = step.Technique + " (Column)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Col ", coords.Col, ", placing a ", val, " at ", coords)
-					step.ReasonCells = colPeers(coords).Slice()
+					step.ReasonCells = ColumnPeersOf(coords).Slice()
 					return step, nil
 				}
 				if bCandidates == targetCellCandidates {
 					step.Technique = step.Technique + " (Box)"
 					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Box ", coords.BoxIndex(), ", placing a ", val, " at ", coords)
-					step.ReasonCells = boxPeers(coords).Slice()
+					step.ReasonCells = BoxPeersOf(coords).Slice()
 					return step, nil
 				}
 			}

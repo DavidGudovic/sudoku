@@ -33,7 +33,7 @@ func (ps PeerSet) With(c board.Coordinates) PeerSet {
 // Without returns a new PeerSet with the specified board.Coordinates removed.
 func (ps PeerSet) Without(c board.Coordinates) PeerSet {
 	result := ps
-	result[c.Row] &= 1 << c.Col
+	result[c.Row] &^= 1 << c.Col
 	return result
 }
 
@@ -175,46 +175,48 @@ func (ps PeerSet) Slice() []board.Coordinates {
 	return coords
 }
 
-// rowPeers returns all board.Coordinates in the rows of the given board.Coordinates
-func rowPeers(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-	for _, c := range coords {
-		ps = ps.WithRow(c.Row)
-	}
-	return ps
-}
-
-// colPeers returns all board.Coordinates in the columns of the given board.Coordinates
-func colPeers(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-	for _, c := range coords {
-		ps = ps.WithCol(c.Col)
-	}
-	return ps
-}
-
-// boxPeers returns all board.Coordinates in the boxes of the given board.Coordinates
-func boxPeers(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-	for _, c := range coords {
-		ps = ps.WithBox(c.BoxIndex())
-	}
-	return ps
-}
-
-// allPeers returns all peers of the given cell(s), excluding the cells themselves
-func allPeers(coords ...board.Coordinates) PeerSet {
+// RowPeersOf returns all board.Coordinates in the rows of the given board.Coordinates excluding them
+func RowPeersOf(coords ...board.Coordinates) PeerSet {
 	var ps PeerSet
 
 	for _, c := range coords {
 		ps = ps.WithRow(c.Row)
+	}
+
+	return ps.Excluding(coords...)
+}
+
+// ColumnPeersOf returns all board.Coordinates in the columns of the given board.Coordinates excluding them
+func ColumnPeersOf(coords ...board.Coordinates) PeerSet {
+	var ps PeerSet
+
+	for _, c := range coords {
+		ps = ps.WithCol(c.Col)
+	}
+
+	return ps.Excluding(coords...)
+}
+
+// BoxPeersOf returns all board.Coordinates in the boxes of the given board.Coordinates excluding them
+func BoxPeersOf(coords ...board.Coordinates) PeerSet {
+	var ps PeerSet
+
+	for _, c := range coords {
+		ps = ps.WithBox(c.BoxIndex())
+	}
+
+	return ps.Excluding(coords...)
+}
+
+// AllPeersOf returns all peers of the given board.Coordinates, excluding the cells themselves
+func AllPeersOf(coords ...board.Coordinates) PeerSet {
+	var ps PeerSet
+
+	for _, c := range coords {
+		ps = ps.WithRow(c.Row)
 		ps = ps.WithCol(c.Col)
 		ps = ps.WithBox(c.BoxIndex())
 	}
 
-	for _, c := range coords {
-		ps = ps.Without(c)
-	}
-
-	return ps
+	return ps.Excluding(coords...)
 }
