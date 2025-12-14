@@ -10,15 +10,17 @@ import (
 
 func TestTechniques(t *testing.T) {
 	tests := []struct {
-		name      string
-		technique Func
-		expecting Step
-		board     string
+		name           string
+		technique      Func
+		board          string
+		shouldProgress bool
+		expecting      Step
 	}{
 		{
-			name:      "LastDigit (Row)",
-			technique: LastDigit,
-			board:     "000000000000000000000000000000000000123406789000000000000000000000000000000000000",
+			name:           "LastDigit (Row)",
+			technique:      LastDigit,
+			board:          "000000000000000000000000000000000000123406789000000000000000000000000000000000000",
+			shouldProgress: true,
 			expecting: Step{
 				Description:   "Value 5 can only go in one place in Row 4, placing a 5 at R4C4",
 				Technique:     "LastDigit (Row)",
@@ -33,9 +35,10 @@ func TestTechniques(t *testing.T) {
 			},
 		},
 		{
-			name:      "LastDigit (Column)",
-			technique: LastDigit,
-			board:     "000600000000500000000700000000000000000100000000300000000900000000200000000800000",
+			name:           "LastDigit (Column)",
+			technique:      LastDigit,
+			board:          "000600000000500000000700000000000000000100000000300000000900000000200000000800000",
+			shouldProgress: true,
 			expecting: Step{
 				Description:   "Value 4 can only go in one place in Col 3, placing a 4 at R3C3",
 				Technique:     "LastDigit (Column)",
@@ -50,9 +53,10 @@ func TestTechniques(t *testing.T) {
 			},
 		},
 		{
-			name:      "LastDigit (Box)",
-			technique: LastDigit,
-			board:     "000000000000000000000000000000123000000604000000789000000000000000000000000000000",
+			name:           "LastDigit (Box)",
+			technique:      LastDigit,
+			board:          "000000000000000000000000000000123000000604000000789000000000000000000000000000000",
+			shouldProgress: true,
 			expecting: Step{
 				Description:   "Value 5 can only go in one place in Box 4, placing a 5 at R4C4",
 				Technique:     "LastDigit (Box)",
@@ -66,6 +70,34 @@ func TestTechniques(t *testing.T) {
 				PlacedValue:       ptr.To(5),
 			},
 		},
+		{
+			name:           "LastDigit (No Progress)",
+			technique:      LastDigit,
+			board:          "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
+		{
+			name:           "NakedSingle (Progress)",
+			technique:      NakedSingle,
+			board:          "002000000006000000007000000008000000004000000003000000000000150000000000000000000",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "The candidate 9 is the only one left at R6C2, placing a 9",
+				Technique:         "NakedSingle",
+				AffectedCells:     []board.Coordinates{{Row: 6, Col: 2}},
+				ReasonCells:       allPeers(board.Coordinates{Row: 6, Col: 2}).Excluding(board.Coordinates{Row: 6, Col: 2}),
+				RemovedCandidates: 0b1000000000,
+				PlacedValue:       ptr.To(9),
+			},
+		},
+		{
+			name:           "NakedSingle (No Progress)",
+			technique:      NakedSingle,
+			board:          "690583010105090803830010500063870100058421036210630008526947381389152647001368000",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
 	}
 
 	for _, tt := range tests {
@@ -73,8 +105,15 @@ func TestTechniques(t *testing.T) {
 			b, _ := board.FromString(tt.board, false)
 			step, err := tt.technique.Apply(b)
 
+			if tt.shouldProgress == false {
+				assert.False(t, step.MadeProgress())
+				assert.Equal(t, tt.expecting, step)
+				return
+			}
+
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expecting, step)
+			assert.True(t, step.MadeProgress())
 		})
 	}
 }

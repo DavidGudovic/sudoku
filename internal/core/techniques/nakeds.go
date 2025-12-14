@@ -1,8 +1,32 @@
 package techniques
 
-import "github.com/DavidGudovic/sudoku/internal/core/board"
+import (
+	"fmt"
 
-func NakedSingle(_ *board.Board) (Step, error) {
+	"github.com/DavidGudovic/sudoku/internal/core/board"
+)
+
+func NakedSingle(puzzle *board.Board) (Step, error) {
+	for row := 0; row < 9; row++ {
+		for col := 0; col < 9; col++ {
+			coords, _ := board.NewCoordinates(row, col)
+			cell := puzzle.CellAt(coords)
+			candidates := cell.Candidates()
+
+			if candidates.Count() == 1 {
+				val := candidates.ToSlice()[0]
+				step := Step{
+					Technique:         "NakedSingle",
+					AffectedCells:     []board.Coordinates{coords},
+					ReasonCells:       allPeers(coords).Excluding(coords),
+					RemovedCandidates: candidates,
+					PlacedValue:       &val,
+					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
+				}
+				return step, nil
+			}
+		}
+	}
 	return Step{}, nil
 }
 
