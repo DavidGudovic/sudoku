@@ -14,8 +14,9 @@ import (
 type PeerSet [board.Size]uint16
 
 var (
-	NoCells        = PeerSet{}
-	FullRow uint16 = 0b111111111
+	NoCells         = PeerSet{}
+	AllCells        = PeerSet{FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow}
+	FullRow  uint16 = 0b111111111
 )
 
 // Contains checks if the set contains the specified board.Coordinates.
