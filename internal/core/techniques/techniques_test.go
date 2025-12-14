@@ -96,7 +96,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "NakedPair",
 				ReasonCells:       []board.Coordinates{{Row: 6, Col: 6}, {Row: 6, Col: 7}},
 				AffectedCells:     []board.Coordinates{{Row: 6, Col: 0}, {Row: 6, Col: 2}},
-				RemovedCandidates: 0b0100000100,
+				RemovedCandidates: 0b0100000000,
 			},
 		},
 		{
