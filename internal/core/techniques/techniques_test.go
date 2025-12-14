@@ -98,14 +98,36 @@ func TestTechniques(t *testing.T) {
 			shouldProgress: false,
 			expecting:      Step{},
 		},
+		{
+			name:           "NakedPair (Progress)",
+			technique:      NakedPair,
+			board:          "904170806700086009826059007007905200502807693089020574070008002260704000498030760",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "Naked Pair found at R3C7 and R3C8, removing candidates from peers",
+				Technique:         "NakedPair",
+				AffectedCells:     []board.Coordinates{{Row: 3, Col: 7}, {Row: 3, Col: 8}},
+				ReasonCells:       allPeers(board.Coordinates{Row: 8, Col: 7}).Including(board.Coordinates{Row: 8, Col: 8}).Excluding(board.Coordinates{Row: 8, Col: 7}).Excluding(board.Coordinates{Row: 8, Col: 8}),
+				RemovedCandidates: 0b0001100000,
+			},
+		},
+		{
+			name:           "NakedPair (No Progress)",
+			technique:      NakedPair,
+			board:          "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b, _ := board.FromString(tt.board, false)
-			step, err := tt.technique.Apply(b)
+			step, err := tt.technique(b)
 
 			if tt.shouldProgress == false {
+				assert.Error(t, err)
+				assert.Equal(t, ErrCannotProgress, err)
 				assert.False(t, step.MadeProgress())
 				assert.Equal(t, tt.expecting, step)
 				return
