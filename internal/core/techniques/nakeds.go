@@ -21,7 +21,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 				step := Step{
 					Technique:         "NakedSingle",
 					AffectedCells:     []board.Coordinates{coords},
-					ReasonCells:       AllPeersOf(coords).Slice(),
+					ReasonCells:       Peers(Of(coords), AcrossAllScopes).Slice(),
 					RemovedCandidates: candidates,
 					PlacedValue:       &val,
 					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
@@ -49,36 +49,24 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 			}
 
 			found, _ := board.NewCoordinates(row, col)
-			peers := AllPeersOf(found).ContainingExactCandidates(*puzzle, candidates)
+			peers := Peers(Of(found), AcrossAllScopes).ContainingExactCandidates(*puzzle, candidates)
 
 			if peers.IsEmpty() {
 				continue
 			}
 
-			var rowAffected PeerSet
-			var colAffected PeerSet
-			var boxAffected PeerSet
 			var affected PeerSet
 			var pair board.Coordinates
 
 			for _, peer := range peers.Slice() {
-				if found.SharesRowWith(peer) {
-					rowAffected = RowPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
+				affected = Peers(Of(found, peer), Across(SharedScopes(Of(peer, found))...)).ContainingCandidates(*puzzle, candidates)
+
+				if affected.IsEmpty() {
+					continue
 				}
 
-				if found.SharesColumnWith(peer) {
-					colAffected = ColumnPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
-				}
-
-				if found.SharesBoxWith(peer) {
-					boxAffected = BoxPeersOf(found).ContainingCandidates(*puzzle, candidates).Excluding(found, peer)
-				}
-
-				if !rowAffected.IsEmpty() || !colAffected.IsEmpty() || !boxAffected.IsEmpty() {
-					affected = rowAffected.Union(colAffected).Union(boxAffected)
-					pair = peer
-					break
-				}
+				pair = peer
+				break
 			}
 
 			if affected.IsEmpty() {

@@ -30,9 +30,9 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 					PlacedValue:       &val,
 				}
 
-				rowPeers := RowPeersOf(coords)
-				columnPeers := ColumnPeersOf(coords)
-				boxPeers := BoxPeersOf(coords)
+				rowPeers := Peers(Of(coords), Across(Row))
+				columnPeers := Peers(Of(coords), Across(Column))
+				boxPeers := Peers(Of(coords), Across(Box))
 
 				found := false
 

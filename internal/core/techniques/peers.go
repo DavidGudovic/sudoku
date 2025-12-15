@@ -6,6 +6,19 @@ import (
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
+var (
+	NoCells                = PeerSet{}
+	FullRow         uint16 = 0b111111111
+	AllScopes              = []Scope{Row, Column, Box}
+	AcrossAllScopes        = Across(AllScopes...)
+)
+
+const (
+	Row Scope = iota
+	Column
+	Box
+)
+
 // PeerSet is an array of bit masks representing board.Coordinates.
 // Each element represents one row, with 9 bits for the 9 columns.
 //
@@ -13,11 +26,84 @@ import (
 // This is used for efficient representation and manipulation of sets of board.Coordinates for techniques.
 type PeerSet [board.Size]uint16
 
-var (
-	NoCells         = PeerSet{}
-	AllCells        = PeerSet{FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow, FullRow}
-	FullRow  uint16 = 0b111111111
-)
+// Scope represents a unit type in Sudoku: Row, Column, or Box. (also known as a "house", or "unit")
+type Scope int
+
+// ScopeSet represents a set of scopes (rows, columns, boxes) to consider when calculating peers.
+// Use the Across helper to create a ScopeSet.
+// Use the AllScopes variable to represent all scopes.
+type ScopeSet struct {
+	scopes []Scope
+}
+
+// Peers returns the PeerSet for the given board.Coordinates and Scope's.
+//
+// It includes all peers in the specified scopes (rows, columns, boxes) for the given coordinates,
+// excluding the coordinates themselves.
+//
+// Example usage:
+//
+//	c := board.Coordinates{Row: 0, Col: 0}
+//	c2 := board.Coordinates{Row: 1, Col: 1}
+//	rcPeers := Peers(Of(c, c2), Across(Row, Column))
+//	allPeers := Peers(Of(c, c2), Across(AllScopes))
+func Peers(coords []board.Coordinates, scopes ScopeSet) PeerSet {
+	var ps PeerSet
+
+	for _, c := range coords {
+		for _, u := range scopes.scopes {
+			switch u {
+			case Row:
+				ps = ps.WithRow(c.Row)
+			case Column:
+				ps = ps.WithCol(c.Col)
+			case Box:
+				ps = ps.WithBox(c.BoxIndex())
+			}
+		}
+	}
+
+	return ps.Excluding(coords...)
+}
+
+// Of creates a slice of board.Coordinates from the provided coordinates to be consumed by the Peers function.
+// Example usage:
+//
+//	Peers(Of(c), Across(Row, Column)) // Peers in the same row and column as c
+func Of(coords ...board.Coordinates) []board.Coordinates {
+	return coords
+}
+
+// Across creates a ScopeSet from the provided scopes to be consumed by the Peers function.
+// Example usage:
+//
+//	Peers(Of(c), Across(Row, Column)) // Peers in the same row and column as c
+func Across(scopes ...Scope) ScopeSet {
+	return ScopeSet{scopes: scopes}
+}
+
+// SharedScopes returns a slice of Scope's representing the shared scopes between two board.Coordinates.
+func SharedScopes(coords []board.Coordinates) []Scope {
+	var scopes []Scope
+
+	first := coords[0]
+
+	for _, c := range coords[1:] {
+		if c.SharesRowWith(first) {
+			scopes = append(scopes, Row)
+		}
+
+		if c.SharesColumnWith(first) {
+			scopes = append(scopes, Column)
+		}
+
+		if c.SharesBoxWith(first) {
+			scopes = append(scopes, Box)
+		}
+	}
+
+	return scopes
+}
 
 // Contains checks if the set contains the specified board.Coordinates.
 func (ps PeerSet) Contains(c board.Coordinates) bool {
@@ -176,52 +262,6 @@ func (ps PeerSet) Slice() []board.Coordinates {
 	return coords
 }
 
-// RowPeersOf returns all board.Coordinates in the rows of the given board.Coordinates excluding them
-func RowPeersOf(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-
-	for _, c := range coords {
-		ps = ps.WithRow(c.Row)
-	}
-
-	return ps.Excluding(coords...)
-}
-
-// ColumnPeersOf returns all board.Coordinates in the columns of the given board.Coordinates excluding them
-func ColumnPeersOf(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-
-	for _, c := range coords {
-		ps = ps.WithCol(c.Col)
-	}
-
-	return ps.Excluding(coords...)
-}
-
-// BoxPeersOf returns all board.Coordinates in the boxes of the given board.Coordinates excluding them
-func BoxPeersOf(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-
-	for _, c := range coords {
-		ps = ps.WithBox(c.BoxIndex())
-	}
-
-	return ps.Excluding(coords...)
-}
-
-// AllPeersOf returns all peers of the given board.Coordinates, excluding the cells themselves
-func AllPeersOf(coords ...board.Coordinates) PeerSet {
-	var ps PeerSet
-
-	for _, c := range coords {
-		ps = ps.WithRow(c.Row)
-		ps = ps.WithCol(c.Col)
-		ps = ps.WithBox(c.BoxIndex())
-	}
-
-	return ps.Excluding(coords...)
-}
-
 // Except returns a new PeerSet excluding the given PeerSet
 func (ps PeerSet) Except(other PeerSet) PeerSet {
 	result := NoCells
@@ -307,22 +347,6 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 		target := p.CellAt(c).Candidates()
 
 		if target == candidates {
-			result = result.With(c)
-		}
-	}
-
-	return result
-}
-
-// NotContainingExactCandidates filters the PeerSet to only include cells that do not contain exactly the specified candidates on the given board.Board.
-func (ps PeerSet) NotContainingExactCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
-	result := NoCells
-
-	coords := ps.Slice()
-	for _, c := range coords {
-		cellCandidates := p.CellAt(c).Candidates()
-
-		if cellCandidates.Intersection(candidates) != cellCandidates {
 			result = result.With(c)
 		}
 	}
