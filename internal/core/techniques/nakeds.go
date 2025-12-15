@@ -49,16 +49,16 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 			}
 
 			found, _ := board.NewCoordinates(row, col)
-			peers := Peers.Of(found).Across(AllScopes...).ContainingExactCandidates(*puzzle, candidates)
+			potentialPairs := Peers.Of(found).Across(AllScopes...).ContainingExactCandidates(*puzzle, candidates)
 
-			if peers.IsEmpty() {
+			if potentialPairs.IsEmpty() {
 				continue
 			}
 
 			var affected PeerSet
 			var pair board.Coordinates
 
-			for _, peer := range peers.Slice() {
+			for _, peer := range potentialPairs.Slice() {
 				affected = Peers.Of(found, peer).AcrossSharedScopes().ContainingCandidates(*puzzle, candidates)
 
 				if affected.IsEmpty() {
