@@ -35,8 +35,7 @@ func BenchmarkBruteForceSolver(b *testing.B) {
 			b.ResetTimer()
 
 			for i := 0; i < b.N; i++ {
-				puzzle := *original
-				_, _, _ = solver.Solve(puzzle)
+				_, _, _ = solver.Solve(*original)
 			}
 		})
 	}
