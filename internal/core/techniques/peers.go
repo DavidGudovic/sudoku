@@ -82,27 +82,40 @@ func Across(scopes ...Scope) ScopeSet {
 	return ScopeSet{scopes: scopes}
 }
 
-// SharedScopes returns a slice of Scope's representing the shared scopes between two board.Coordinates.
+// SharedScopes returns a slice of Scope's representing the shared scopes between all board.Coordinates.
 func SharedScopes(coords []board.Coordinates) []Scope {
-	var scopes []Scope
+	if len(coords) == 0 {
+		return nil
+	}
 
 	first := coords[0]
+	checks := []struct {
+		scope Scope
+		check func(board.Coordinates) bool
+	}{
+		{Row, first.SharesRowWith},
+		{Column, first.SharesColumnWith},
+		{Box, first.SharesBoxWith},
+	}
 
-	for _, c := range coords[1:] {
-		if c.SharesRowWith(first) {
-			scopes = append(scopes, Row)
-		}
-
-		if c.SharesColumnWith(first) {
-			scopes = append(scopes, Column)
-		}
-
-		if c.SharesBoxWith(first) {
-			scopes = append(scopes, Box)
+	var scopes []Scope
+	for _, chk := range checks {
+		if allCoords(coords[1:], chk.check) {
+			scopes = append(scopes, chk.scope)
 		}
 	}
 
 	return scopes
+}
+
+// allCoords checks if all coordinates satisfy the given predicate.
+func allCoords(coords []board.Coordinates, predicate func(board.Coordinates) bool) bool {
+	for _, c := range coords {
+		if !predicate(c) {
+			return false
+		}
+	}
+	return true
 }
 
 // Contains checks if the set contains the specified board.Coordinates.
