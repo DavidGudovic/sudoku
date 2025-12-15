@@ -30,15 +30,17 @@ type Scope int
 
 type peerQuery struct{}
 
-// Peers is the entry point for building PeerSet's based on board.Coordinates and scopes.
+// Peers is the entry point for building PeerSet's based on board.Coordinates and Scope's.
 var Peers peerQuery
 
 // Of starts building a PeerSet for the specified board.Coordinates.
+//
 // To finalize the query and build the PeerSet, call Across(...Scope) or AcrossSharedScopes().
 func (peerQuery) Of(coords ...board.Coordinates) WithCoordinates {
 	return WithCoordinates{coords: coords}
 }
 
+// WithCoordinates is a helper type for building PeerSet's based on board.Coordinates.
 type WithCoordinates struct {
 	coords []board.Coordinates
 }
@@ -63,7 +65,8 @@ func (w WithCoordinates) Across(scopes ...Scope) PeerSet {
 	return ps.Excluding(w.coords...)
 }
 
-// AcrossSharedScopes builds a PeerSet containing all peers of the specified board.Coordinates across shared scopes.
+// AcrossSharedScopes builds a PeerSet containing all peers of the specified board.Coordinates across shared Scope.
+// Shared Scope is defined as a scope where all coordinates share the same row, column, or box.
 func (w WithCoordinates) AcrossSharedScopes() PeerSet {
 	return w.Across(SharedScopesOf(w.coords)...)
 }
@@ -76,8 +79,8 @@ func SharedScopesOf(coords []board.Coordinates) []Scope {
 
 	first := coords[0]
 	checks := []struct {
-		scope Scope
-		check func(board.Coordinates) bool
+		scope     Scope
+		predicate func(board.Coordinates) bool
 	}{
 		{Row, first.SharesRowWith},
 		{Column, first.SharesColumnWith},
@@ -86,7 +89,7 @@ func SharedScopesOf(coords []board.Coordinates) []Scope {
 
 	var scopes []Scope
 	for _, chk := range checks {
-		if allCoords(coords[1:], chk.check) {
+		if allCoords(coords[1:], chk.predicate) {
 			scopes = append(scopes, chk.scope)
 		}
 	}
@@ -218,7 +221,7 @@ func (ps PeerSet) PeersInBox(boxIndex int) PeerSet {
 	return result
 }
 
-// Count returns the number of board.Coordinates in the set.
+// Count returns the amount of board.Coordinates in the set.
 func (ps PeerSet) Count() int {
 	count := 0
 	for _, row := range ps {
