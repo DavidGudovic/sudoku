@@ -21,7 +21,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 				step := Step{
 					Technique:         "NakedSingle",
 					AffectedCells:     []board.Coordinates{coords},
-					ReasonCells:       Peers(Of(coords), AcrossAllScopes).Slice(),
+					ReasonCells:       Peers.Of(coords).Across(AllScopes...).Slice(),
 					RemovedCandidates: candidates,
 					PlacedValue:       &val,
 					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
@@ -49,7 +49,7 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 			}
 
 			found, _ := board.NewCoordinates(row, col)
-			peers := Peers(Of(found), AcrossAllScopes).ContainingExactCandidates(*puzzle, candidates)
+			peers := Peers.Of(found).Across(AllScopes...).ContainingExactCandidates(*puzzle, candidates)
 
 			if peers.IsEmpty() {
 				continue
@@ -59,7 +59,7 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 			var pair board.Coordinates
 
 			for _, peer := range peers.Slice() {
-				affected = Peers(Of(found, peer), Across(SharedScopes(Of(peer, found))...)).ContainingCandidates(*puzzle, candidates)
+				affected = Peers.Of(found, peer).AcrossSharedScopes().ContainingCandidates(*puzzle, candidates)
 
 				if affected.IsEmpty() {
 					continue
