@@ -33,6 +33,11 @@ type peerQuery struct{}
 // Peers is the entry point for building PeerSet's based on board.Coordinates and Scope's.
 var Peers peerQuery
 
+// WithCoordinates is a helper type for building PeerSet's based on board.Coordinates.
+type WithCoordinates struct {
+	coords []board.Coordinates
+}
+
 // Of starts building a PeerSet for the specified board.Coordinates.
 //
 // To finalize the query and build the PeerSet, call Across(...Scope) or AcrossSharedScopes().
@@ -40,9 +45,45 @@ func (peerQuery) Of(coords ...board.Coordinates) WithCoordinates {
 	return WithCoordinates{coords: coords}
 }
 
-// WithCoordinates is a helper type for building PeerSet's based on board.Coordinates.
-type WithCoordinates struct {
-	coords []board.Coordinates
+// All finalizes the query with a PeerSet containing all board.Coordinates on the board.
+func (peerQuery) All() PeerSet {
+	return PeerSet{
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+		0b111111111,
+	}
+}
+
+// Empty finalizes the query with an empty PeerSet.
+func (peerQuery) Empty() PeerSet {
+	return NoCells
+}
+
+// InScope finalizes the query with a PeerSet containing all board.Coordinates in the specified Scope and index.
+func (peerQuery) InScope(scope Scope, index int) PeerSet {
+	ps := NoCells
+
+	switch scope {
+	case Row:
+		ps[index] = FullRow
+	case Column:
+		for r := 0; r < board.Size; r++ {
+			ps[r] |= 1 << index
+		}
+	case Box:
+		for i := 0; i < board.BoxSize*board.BoxSize; i++ {
+			coords, _ := board.CoordsFromBoxIndex(index, i)
+			ps = ps.With(coords)
+		}
+	}
+
+	return ps
 }
 
 // Across builds a PeerSet containing all peers of the specified board.Coordinates across the given scopes.
@@ -53,11 +94,22 @@ func (w WithCoordinates) Across(scopes ...Scope) PeerSet {
 		for _, s := range scopes {
 			switch s {
 			case Row:
-				ps = ps.WithRow(c.Row)
+				for col := 0; col < board.Size; col++ {
+					ps = ps.Including(board.Coordinates{Row: c.Row, Col: col})
+				}
 			case Column:
-				ps = ps.WithCol(c.Col)
+				for row := 0; row < board.Size; row++ {
+					ps = ps.Including(board.Coordinates{Row: row, Col: c.Col})
+				}
 			case Box:
-				ps = ps.WithBox(c.BoxIndex())
+				boxStartRow := (c.Row / board.BoxSize) * board.BoxSize
+				boxStartCol := (c.Col / board.BoxSize) * board.BoxSize
+
+				for r := 0; r < board.BoxSize; r++ {
+					for col := 0; col < board.BoxSize; col++ {
+						ps = ps.Including(board.Coordinates{Row: boxStartRow + r, Col: boxStartCol + col})
+					}
+				}
 			}
 		}
 	}
@@ -126,36 +178,6 @@ func (ps PeerSet) Without(c board.Coordinates) PeerSet {
 	return result
 }
 
-// WithRow returns a new PeerSet with all cells in the specified row added.
-func (ps PeerSet) WithRow(row int) PeerSet {
-	result := ps
-	result[row] = FullRow
-	return result
-}
-
-// WithCol returns a new PeerSet with all cells in the specified column added.
-func (ps PeerSet) WithCol(col int) PeerSet {
-	result := ps
-
-	for r := 0; r < board.Size; r++ {
-		result[r] |= 1 << col
-	}
-
-	return result
-}
-
-// WithBox returns a new PeerSet with all cells in the specified box added.
-func (ps PeerSet) WithBox(boxIndex int) PeerSet {
-	result := ps
-
-	for i := 0; i < board.BoxSize*board.BoxSize; i++ {
-		coords, _ := board.CoordsFromBoxIndex(boxIndex, i)
-		result = result.With(coords)
-	}
-
-	return result
-}
-
 // Union returns a new PeerSet that is the union of this set and another.
 func (ps PeerSet) Union(other PeerSet) PeerSet {
 	result := NoCells
@@ -191,34 +213,6 @@ func (ps PeerSet) HasPeersInBox(boxIndex int) bool {
 		}
 	}
 	return false
-}
-
-// PeersInRow returns a new PeerSet containing only the peers in the specified row.
-func (ps PeerSet) PeersInRow(row int) PeerSet {
-	result := NoCells
-	result[row] = ps[row]
-	return result
-}
-
-// PeersInCol returns a new PeerSet containing only the peers in the specified column.
-func (ps PeerSet) PeersInCol(col int) PeerSet {
-	result := NoCells
-	for r := 0; r < board.Size; r++ {
-		result[r] = ps[r] & (1 << col)
-	}
-	return result
-}
-
-// PeersInBox returns a new PeerSet containing only the peers in the specified box.
-func (ps PeerSet) PeersInBox(boxIndex int) PeerSet {
-	result := NoCells
-	for i := 0; i < board.BoxSize*board.BoxSize; i++ {
-		coords, _ := board.CoordsFromBoxIndex(boxIndex, i)
-		if ps.Contains(coords) {
-			result = result.With(coords)
-		}
-	}
-	return result
 }
 
 // Count returns the amount of board.Coordinates in the set.

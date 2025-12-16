@@ -13,8 +13,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
 			coords, _ := board.NewCoordinates(row, col)
-			cell := puzzle.CellAt(coords)
-			candidates := cell.Candidates()
+			candidates := puzzle.CellAt(coords).Candidates()
 
 			if candidates.Count() == 1 {
 				val := candidates.Slice()[0]
