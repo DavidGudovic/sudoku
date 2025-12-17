@@ -18,7 +18,7 @@ type backtrackStats struct {
 func Backtracking(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
 
-	if puzzle.IsFaux() && puzzle.GetState() == board.Invalid {
+	if puzzle.IsUnconstrained() && puzzle.GetState() == board.Invalid {
 		return Step{}, ErrCannotSolve
 	}
 
@@ -59,7 +59,7 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 	}
 
 	for val := board.MinValue; val <= board.MaxValue; val++ {
-		if !puzzle.IsFaux() && puzzle.Cells[c.Row][c.Col].ContainsCandidate(val) == false {
+		if !puzzle.IsUnconstrained() && puzzle.CellAt(c).ContainsCandidate(val) == false {
 			continue
 		}
 
@@ -95,19 +95,21 @@ func findSuitableCell(puzzle board.Board) (board.Coordinates, error) {
 
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			if puzzle.Cells[row][col].Value() != board.EmptyCell {
+			c, _ := board.NewCoordinates(row, col)
+
+			if puzzle.CellAt(c).Value() != board.EmptyCell {
 				continue
 			}
 
-			candidates := puzzle.CellAt(board.Coordinates{Row: row, Col: col}).Candidates()
+			candidates := puzzle.CellAt(c).Candidates()
 
 			if candidates.Count() == 1 {
-				return board.Coordinates{Row: row, Col: col}, nil
+				return c, nil
 			}
 
 			if candidates.Count() < leastCandidates {
 				leastCandidates = candidates.Count()
-				bestCell = board.Coordinates{Row: row, Col: col}
+				bestCell = c
 			}
 		}
 	}

@@ -31,14 +31,14 @@ var (
 // State represents the current state of the board
 //   - Invalid is a board state where at least one row, column, or box contains duplicate values, or an EmptyCell contains NoCandidates.
 //   - Unsolved is a valid board state where at least one Cell is an EmptyCell.
-//   - Solved is a valid board state where all Cells are filled with values.
+//   - Solved is a valid board state where all cells are filled with values.
 type State int
 
-// Board represents a Size*Size Sudoku board composed of Cells.
+// Board represents a Size*Size Sudoku board composed of cells.
 // Each Cell holds its current value and a CandidateSet.
-// The Board constraints (Sudoku rules), unless explicitly turned off by using a Faux board, are always enforced and all CandidateSet's are updated accordingly.
+// The Board constraints (Sudoku rules), unless explicitly turned off by using an unconstrained board, are always enforced and all CandidateSet's are updated accordingly.
 type Board struct {
-	Cells               [Size][Size]Cell
+	cells               [Size][Size]Cell
 	enforcesConstraints bool
 }
 
@@ -52,25 +52,25 @@ func NewBoard() *Board {
 		}
 	}
 
-	return &Board{Cells: cells, enforcesConstraints: true}
+	return &Board{cells: cells, enforcesConstraints: true}
 }
 
-// NewFauxBoard initializes a Size*Size empty board with full candidates that does not enforce constraints when setting values.
+// NewUnconstrainedBoard initializes a Size*Size empty board with full candidates that does not enforce constraints when setting values.
 //
 // Used when the board is being populated from an external source (e.g., FromString) where the input may not adhere to Sudoku rules,
 // or when automatic constraints enforcement is not desired i.e., manual candidate management.
-func NewFauxBoard() *Board {
+func NewUnconstrainedBoard() *Board {
 	board := NewBoard()
 	board.enforcesConstraints = false
 	return board
 }
 
 // FromString populates a new empty board with the values extracted from a string representation of the board.
-func FromString(s string, isFauxBoard bool) (*Board, error) {
+func FromString(s string, isUnconstrained bool) (*Board, error) {
 	var board *Board
 
-	if isFauxBoard {
-		board = NewFauxBoard()
+	if isUnconstrained {
+		board = NewUnconstrainedBoard()
 	} else {
 		board = NewBoard()
 	}
@@ -134,8 +134,8 @@ func filterCandidates(s string) (string, error) {
 	return sb.String(), nil
 }
 
-// IsFaux returns true if the board was created as a faux board (i.e., with constraints enforcement turned off)
-func (b *Board) IsFaux() bool {
+// IsUnconstrained returns true if the board was created as an unconstrained board (i.e., with constraints enforcement turned off)
+func (b *Board) IsUnconstrained() bool {
 	return b.enforcesConstraints == false
 }
 
@@ -146,7 +146,7 @@ func (b *Board) ToString(withCandidates bool) string {
 
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			cell := b.Cells[row][col]
+			cell := b.cells[row][col]
 
 			s.WriteRune(rune(cell.value + '0'))
 
@@ -175,23 +175,23 @@ func (b *Board) SetValueOnCoords(c Coordinates, value int) error {
 		return ErrIndexOutOfBounds
 	}
 
-	if b.enforcesConstraints && value != EmptyCell && b.Cells[c.Row][c.Col].ContainsCandidate(value) == false {
+	if b.enforcesConstraints && value != EmptyCell && b.cells[c.Row][c.Col].ContainsCandidate(value) == false {
 		return ErrValueNotACandidate
 	}
 
-	b.Cells[c.Row][c.Col].value = value
+	b.cells[c.Row][c.Col].value = value
 
 	if b.enforcesConstraints == false {
 		return nil
 	}
 
 	if value == EmptyCell {
-		b.Cells[c.Row][c.Col].candidates = AllCandidates
+		b.cells[c.Row][c.Col].candidates = AllCandidates
 		b.recalculateCandidateSets()
 	}
 
 	if value != EmptyCell {
-		b.Cells[c.Row][c.Col].candidates = NoCandidates
+		b.cells[c.Row][c.Col].candidates = NoCandidates
 		b.propagateConstraints(c, value)
 	}
 
@@ -224,12 +224,12 @@ func (b *Board) GetValueByIndex(index int) (int, error) {
 
 // ExcludeCandidatesFromCoords provides a safe way for consumers to mutate candidates of a cell.
 func (b *Board) ExcludeCandidatesFromCoords(coords Coordinates, candidates CandidateSet) {
-	b.Cells[coords.Row][coords.Col].candidates.Exclude(candidates)
+	b.cells[coords.Row][coords.Col].candidates.Exclude(candidates)
 }
 
 // CellAt returns the Cell at the given Coordinates
 func (b *Board) CellAt(coordinates Coordinates) Cell {
-	return b.Cells[coordinates.Row][coordinates.Col]
+	return b.cells[coordinates.Row][coordinates.Col]
 }
 
 // GetState resolves the current state of the board into one of [ Invalid, Unsolved, Solved]
@@ -277,26 +277,26 @@ func (b *Board) resolveValidState(rows, cols, boxes [Size]CandidateSet) State {
 	return Solved
 }
 
-// propagateConstraints removes the given value from the CandidateSet of all Cells in the same row, column, and box as the given Coordinates
+// propagateConstraints removes the given value from the CandidateSet of all cells in the same row, column, and box as the given Coordinates
 func (b *Board) propagateConstraints(c Coordinates, value int) {
 	boxIndex := c.BoxIndex()
 
 	for i := 0; i < Size; i++ {
-		b.Cells[c.Row][i].candidates.Remove(value)
-		b.Cells[i][c.Col].candidates.Remove(value)
+		b.cells[c.Row][i].candidates.Remove(value)
+		b.cells[i][c.Col].candidates.Remove(value)
 
 		bc, _ := CoordsFromBoxIndex(boxIndex, i)
-		b.Cells[bc.Row][bc.Col].candidates.Remove(value)
+		b.cells[bc.Row][bc.Col].candidates.Remove(value)
 	}
 }
 
-// recalculateCandidateSets recalculates the CandidateSet for the Cells
+// recalculateCandidateSets recalculates the CandidateSet for the cells
 func (b *Board) recalculateCandidateSets() {
 	// Reset candidates for all empty cells
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			if b.Cells[row][col].value == EmptyCell {
-				b.Cells[row][col].candidates = AllCandidates
+			if b.cells[row][col].value == EmptyCell {
+				b.cells[row][col].candidates = AllCandidates
 			}
 		}
 	}
@@ -304,7 +304,7 @@ func (b *Board) recalculateCandidateSets() {
 	// Re-apply constraints based on current cell values
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			cell := b.Cells[row][col]
+			cell := b.cells[row][col]
 
 			if cell.value != EmptyCell {
 				c, _ := NewCoordinates(row, col)

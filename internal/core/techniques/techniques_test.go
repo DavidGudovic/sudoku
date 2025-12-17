@@ -128,7 +128,7 @@ func TestTechniques(t *testing.T) {
 
 			// Should have affected the expected cells with correct placements/removals
 			for _, affected := range step.AffectedCells {
-				cell := b.Cells[affected.Row][affected.Col]
+				cell := b.cells[affected.Row][affected.Col]
 				if step.PlacedValue != nil {
 					assert.Equal(t, *step.PlacedValue, cell.Value())
 				}

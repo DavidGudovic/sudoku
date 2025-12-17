@@ -41,8 +41,8 @@ func TestBoard_GetState(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			isFauxBoard := tt.want == Invalid
-			board, _ := FromString(tt.board, isFauxBoard)
+			isUnconstrainedBoard := tt.want == Invalid
+			board, _ := FromString(tt.board, isUnconstrainedBoard)
 			assert.Equal(t, tt.want, board.GetState())
 		})
 	}
@@ -143,52 +143,52 @@ func TestBoard_SerializeSerializer(t *testing.T) {
 	assert.Equal(t, newBoard, board)
 }
 
-func TestBoard_IsFaux(t *testing.T) {
+func TestBoard_IsUnconstrained(t *testing.T) {
 	tests := []struct {
-		name     string
-		board    *Board
-		wantFaux bool
+		name              string
+		board             *Board
+		wantUnconstrained bool
 	}{
 		{
-			name:     "Normal board",
-			board:    NewBoard(),
-			wantFaux: false,
+			name:              "Normal board",
+			board:             NewBoard(),
+			wantUnconstrained: false,
 		},
 		{
-			name:     "Faux board",
-			board:    NewFauxBoard(),
-			wantFaux: true,
+			name:              "Unconstrained board",
+			board:             NewUnconstrainedBoard(),
+			wantUnconstrained: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.wantFaux, tt.board.IsFaux())
+			assert.Equal(t, tt.wantUnconstrained, tt.board.IsUnconstrained())
 		})
 	}
 }
 
 func TestBoard_ConstraintEnforcement(t *testing.T) {
 	tests := []struct {
-		name        string
-		board       *Board
-		setValue    struct{ row, col, value int }
-		checkCell   struct{ row, col int }
-		isFauxBoard bool
+		name                 string
+		board                *Board
+		setValue             struct{ row, col, value int }
+		checkCell            struct{ row, col int }
+		isUnconstrainedBoard bool
 	}{
 		{
-			name:        "Normal board enforces constraints",
-			board:       NewBoard(),
-			setValue:    struct{ row, col, value int }{0, 0, 5},
-			checkCell:   struct{ row, col int }{0, 1},
-			isFauxBoard: false,
+			name:                 "Normal board enforces constraints",
+			board:                NewBoard(),
+			setValue:             struct{ row, col, value int }{0, 0, 5},
+			checkCell:            struct{ row, col int }{0, 1},
+			isUnconstrainedBoard: false,
 		},
 		{
-			name:        "Faux board does not enforce constraints",
-			board:       NewFauxBoard(),
-			setValue:    struct{ row, col, value int }{0, 0, 5},
-			checkCell:   struct{ row, col int }{0, 1},
-			isFauxBoard: true,
+			name:                 "Unconstrained board does not enforce constraints",
+			board:                NewUnconstrainedBoard(),
+			setValue:             struct{ row, col, value int }{0, 0, 5},
+			checkCell:            struct{ row, col int }{0, 1},
+			isUnconstrainedBoard: true,
 		},
 	}
 
@@ -199,12 +199,12 @@ func TestBoard_ConstraintEnforcement(t *testing.T) {
 			err := tt.board.SetValueOnCoords(c, tt.setValue.value)
 			assert.NoError(t, err)
 
-			checkCell := tt.board.Cells[tt.checkCell.row][tt.checkCell.col]
+			checkCell := tt.board.cells[tt.checkCell.row][tt.checkCell.col]
 			hasCandidate := checkCell.ContainsCandidate(tt.setValue.value)
 
 			err = tt.board.SetValueOnCoords(cc, tt.setValue.value)
 
-			if tt.isFauxBoard {
+			if tt.isUnconstrainedBoard {
 				assert.NoError(t, err)
 				assert.True(t, hasCandidate)
 			} else {
@@ -216,32 +216,32 @@ func TestBoard_ConstraintEnforcement(t *testing.T) {
 	}
 }
 
-func TestFromString_FauxBoard(t *testing.T) {
+func TestFromString_UnconstrainedBoard(t *testing.T) {
 	tests := []struct {
-		name        string
-		boardString string
-		isFauxBoard bool
-		wantFaux    bool
+		name                 string
+		boardString          string
+		isUnconstrainedBoard bool
+		wantUnconstrained    bool
 	}{
 		{
-			name:        "Normal board from string",
-			boardString: "637159248281347956594268173816592734429783615375614829742936581953821467168475392",
-			isFauxBoard: false,
-			wantFaux:    false,
+			name:                 "Normal board from string",
+			boardString:          "637159248281347956594268173816592734429783615375614829742936581953821467168475392",
+			isUnconstrainedBoard: false,
+			wantUnconstrained:    false,
 		},
 		{
-			name:        "Faux board from string",
-			boardString: "637159248281347956594268173816592734429783615375614829742936581953821467168475392",
-			isFauxBoard: true,
-			wantFaux:    true,
+			name:                 "Unconstrained board from string",
+			boardString:          "637159248281347956594268173816592734429783615375614829742936581953821467168475392",
+			isUnconstrainedBoard: true,
+			wantUnconstrained:    true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			board, err := FromString(tt.boardString, tt.isFauxBoard)
+			board, err := FromString(tt.boardString, tt.isUnconstrainedBoard)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.wantFaux, board.IsFaux())
+			assert.Equal(t, tt.wantUnconstrained, board.IsUnconstrained())
 		})
 	}
 }
