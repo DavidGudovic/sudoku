@@ -37,14 +37,13 @@ steps, _ := logicalSolver.Solve(puzzle)
 
 // Take a single step for interactive solving
 step, _ := logicalSolver.TakeAStep(puzzle)
-step.MustApplyTo(puzzle)
 ```
 
 ## Features
 
 ### Board Representation
 
-Efficient representation of Sudoku boards with intelligent constraint management:
+Efficient representation of Sudoku boards with automatic constraint management:
 
 - Bitmask-based candidate tracking (uint16 per cell)
 - Support for standard 9x9 Sudoku puzzles
@@ -70,7 +69,7 @@ if candidates.Contains(7) {
 
 ### Brute Force Solver
 
-Fast and efficient brute-force solver using optimized backtracking:
+Efficient brute-force solver using optimized backtracking:
 
 - **Minimum Remaining Values (MRV)** heuristic for smart variable selection
 - **Constraint propagation** to reduce search space
@@ -216,7 +215,7 @@ steps, _ := customSolver.Solve(puzzle)
 
 The solver is highly optimized for performance:
 
-- **Speed**: Solves even the hardest puzzles in under 1ms on modern hardware
+- **Speed**: Solves even the hardest puzzles in ~ 1ms on modern hardware
 - **Efficiency**: Bitmasks for O(1) candidate and peer operations
 - **Memory**: Minimal overhead due to efficient data structures
 - **Benchmarks**: Comprehensive benchmark suite included
@@ -227,9 +226,11 @@ go test -bench=. ./internal/core/solver
 
 **Benchmark Results:**
 ```
-BenchmarkSolver_Easy        <1 ms per operation
-BenchmarkSolver_Vicious     <1 ms per operation
-BenchmarkSolver_Hardest     <1 ms per operation
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
+
+BenchmarkBruteForceSolver/Easy-16                  57795             20244 ns/op            1665 B/op          4 allocs/op
+BenchmarkBruteForceSolver/Vicious-16                1676            703317 ns/op            1681 B/op          6 allocs/op
+BenchmarkBruteForceSolver/Hardest-16                 978           1202976 ns/op            1682 B/op          6 allocs/op
 ```
 
 ## License
