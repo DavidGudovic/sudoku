@@ -225,12 +225,13 @@ go test -bench=. ./internal/core/solver
 ```
 
 **Benchmark Results:**
+- With Solver orchestration overhead:
 ```
 cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
 
-BenchmarkBruteForceSolver/Easy-16                  57795             20244 ns/op            1665 B/op          4 allocs/op
-BenchmarkBruteForceSolver/Vicious-16                1676            703317 ns/op            1681 B/op          6 allocs/op
-BenchmarkBruteForceSolver/Hardest-16                 978           1202976 ns/op            1682 B/op          6 allocs/op
+BenchmarkBruteForceSolver/Easy-16      57795     20244 ns/op   1665 B/op   4 allocs/op
+BenchmarkBruteForceSolver/Vicious-16    1676    703317 ns/op   1681 B/op   6 allocs/op
+BenchmarkBruteForceSolver/Hardest-16     978   1202976 ns/op   1682 B/op   6 allocs/op
 ```
 
 ## License
