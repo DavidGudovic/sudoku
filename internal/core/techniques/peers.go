@@ -94,11 +94,11 @@ func (w WithCoordinates) Across(scopes ...Scope) PeerSet {
 			switch s {
 			case Row:
 				for col := 0; col < board.Size; col++ {
-					ps = ps.With(board.Coordinates{Row: c.Row, Col: col})
+					ps = ps.With(board.MustCoordinates(c.Row, col))
 				}
 			case Column:
 				for row := 0; row < board.Size; row++ {
-					ps = ps.With(board.Coordinates{Row: row, Col: c.Col})
+					ps = ps.With(board.MustCoordinates(row, c.Col))
 				}
 			case Box:
 				for i := 0; i < board.Size; i++ {

@@ -41,7 +41,7 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 func NakedPair(puzzle *board.Board) (Step, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			candidates := puzzle.CellAt(board.Coordinates{Row: row, Col: col}).Candidates()
+			candidates := puzzle.CellAt(board.MustCoordinates(row, col)).Candidates()
 
 			if candidates.Count() != 2 {
 				continue

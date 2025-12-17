@@ -60,7 +60,7 @@ func (cs *CandidateSet) Add(value int) error {
 
 // Remove removes (sets the bit to 0) the specified candidate value from the CandidateSet.
 func (cs *CandidateSet) Remove(value int) {
-	*cs &= ^(1 << value)
+	*cs &^= 1 << value
 }
 
 // Exclude removes all candidates present in the other CandidateSet from the current CandidateSet.

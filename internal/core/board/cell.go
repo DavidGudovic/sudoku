@@ -78,6 +78,7 @@ func CoordsFromBoxIndex(boxIndex int, positionInBox int) (Coordinates, error) {
 // If the input is invalid, there's either a serious bug in the caller or the world view is wrong, therefore it panics.
 func MustCoordsFromBoxIndex(boxIndex int, positionInBox int) Coordinates {
 	c, err := CoordsFromBoxIndex(boxIndex, positionInBox)
+	
 	if err != nil {
 		panic("Impossible: " + err.Error())
 	}

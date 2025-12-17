@@ -87,7 +87,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepSt
 		return puzzle, steps, nil
 	}
 
-	return puzzle, nil, ErrUnsolvablePuzzle
+	return puzzle, steps, ErrUnsolvablePuzzle
 }
 
 // TakeAStep applies the next applicable technique to the puzzle and returns the updated board and the step taken.
