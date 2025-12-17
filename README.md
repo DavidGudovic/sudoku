@@ -1,66 +1,237 @@
 # Sudoku
 
-This repository contains a Sudoku library implemented in GO. It provides various functionalities to work with Sudoku
-puzzles, including brute force or logical solving, generating, grading puzzles, detailed readable solving steps with affected cells, removed candidates, placed values and reason cells, reasoning.
+A high-performance Sudoku library implemented in Go. This library provides comprehensive functionality for working with Sudoku puzzles, including brute-force and logical solving, puzzle generation, difficulty grading, and detailed step-by-step solutions with explanations.
 
-The project is my first attempt at Go, other than a REST Api in Golang course, and I created it to deepen my understanding
-of the language.
+The project is my first attempt at Go beyond a REST API course, created to deepen my understanding of the language through practical implementation of complex algorithms and data structures.
+
+## Quick Start
+
+```go
+import (
+    "github.com/DavidGudovic/sudoku/internal/core/board"
+    "github.com/DavidGudovic/sudoku/internal/core/solver"
+)
+
+// Create a board from a string (0 represents empty cells)
+puzzle, _ := board.FromString(
+    "530070000" +
+    "600195000" +
+    "098000060" +
+    "800060003" +
+    "400803001" +
+    "700020006" +
+    "060000280" +
+    "000419005" +
+    "000080079",
+)
+
+// Note: Candidates can also be serialized in the string representation using * (e.g., "5*67" means candidates 5, 6, and 7 are possible for that cell)
+
+// Solve using brute force (backtracking)
+bruteForceSolver := solver.NewBruteForceSolver()
+steps, _ := bruteForceSolver.Solve(puzzle)
+
+// Solve using human-like logical techniques
+logicalSolver := solver.NewLogicalSolver()
+steps, _ := logicalSolver.Solve(puzzle)
+
+// Take a single step for interactive solving
+step, _ := logicalSolver.TakeAStep(puzzle)
+step.MustApplyTo(puzzle)
+```
 
 ## Features
 
-### Board representation
--- Efficient representation of Sudoku boards with bitmasks for candidates.
--- Support for standard 9x9 Sudoku puzzles.
--- Automated constraint propagation.
--- Automated detection of invalid/solved boards.
--- Serialization and deserialization of boards to/from strings.
+### Board Representation
 
-### Bruto force solver (Optimized Backtracking, Knuth's Algorithm X with Dancing Links)
--- Fast and efficient brute-force solver using optimized backtracking techniques.
---- Minimal remaining values (MRV) heuristic for variable selection.
---- Constraint propagation to reduce search space.
---- Forward checking to prevent invalid assignments.
--- Knuth's Algorithm X with Dancing Links implementation for exact cover problems.
---- Work in progress
+Efficient representation of Sudoku boards with intelligent constraint management:
 
-### Logical Step Solver (Human like techniques producing a step-by-step solution)
--- Implements various human-like solving techniques, including:
---- Last Digit
---- Naked Pairs
---- Naked Triples ...
---- Hidden Singles
---- Hidden Pairs
---- Hidden Triples ...
---- Pointing Pairs
---- X-Wings
---- Skyscrapers
---- Two-String Kites
---- More features to be added soon.
+- Bitmask-based candidate tracking (uint16 per cell)
+- Support for standard 9x9 Sudoku puzzles
+- Automated constraint propagation (Can be turned off)
+- Automatic detection of invalid/solved board states 
+- Serialization and deserialization to/from strings
+
+```go
+// Create coordinates and set values
+coords, _ := board.NewCoordinates(4, 5)
+puzzle.SetValueOnCoords(coords, 7)
+
+// Check board state
+state := puzzle.GetState() // Invalid, Unsolved, or Solved
+
+// Examine cell candidates
+cell := puzzle.CellAt(coords)
+candidates := cell.Candidates()
+if candidates.Contains(7) {
+    // 7 is a valid candidate for this cell
+}
+```
+
+### Brute Force Solver
+
+Fast and efficient brute-force solver using optimized backtracking:
+
+- **Minimum Remaining Values (MRV)** heuristic for smart variable selection
+- **Constraint propagation** to reduce search space
+- **Forward checking** to prevent invalid assignments
+- Solves even the hardest puzzles in under 1ms on modern hardware
+
+```go
+solver := solver.NewBruteForceSolver()
+steps, err := solver.Solve(puzzle)
+if err != nil {
+    // Puzzle is unsolvable
+}
+```
+
+> **Note**: Knuth's Algorithm X with Dancing Links implementation is in progress.
+
+### Logical Step Solver
+
+Human-like solving techniques producing step-by-step solutions:
+
+**Implemented Techniques:**
+- Last Digit (Row, Column, Box variants)
+- Naked Single
+- Naked Pair
+
+**Planned Techniques:**
+- Hidden Single
+- Hidden Pair
+- Pointing Pair
+- X-Wing
+- Skyscraper
+- Two-String Kite
+
+Each technique returns a detailed `Step` structure containing all information needed for educational UIs:
+
+```go
+type Step struct {
+    Description       string              // Human-readable explanation
+    Technique         string              // Technique name
+    AffectedCells     []Coordinates       // Cells where changes occurred
+    RemovedCandidates CandidateSet        // Candidates eliminated
+    PlacedValue       *PlacedValue        // Value placed (if any)
+    ReasonCells       []Coordinates       // Cells that justify this step
+}
+```
+
+This makes the library ideal for building educational Sudoku applications that explain solving strategies step-by-step.
 
 ### PeerSet and PeerQuery API
--- Efficient querying of peers (rows, columns, boxes) for a given cell.
--- PeerSet structure to manage and manipulate sets of using a [9]uint16 bitmask representation of the board.
--- Immutable, composable, type safe Query API for expressing complex techniques in an almost natural language.
--- # Type the code as you think about the problem #
 
-### Generator - Work in progress
-### Grader - Work in progress
+Composable, type-safe query API for expressing complex solving techniques in near-natural language:
 
-## Outside Core Functionality but planned
+- Efficient querying of peers (rows, columns, boxes) for any cell
+- Bitmask-based set operations ([9]uint16 representation)
+- Immutable operations with method chaining
+- O(1) containment checks and set operations
+- Compiler enforced type safety to prevent invalid queries
+
+```go
+
+// Find all peers of a cell across row, column, and box
+peers := Peers.Of(coords).Across(
+    Row,
+    Column,
+    Box,
+)
+
+// Use variadic syntax for all scopes
+allPeers := Peers.Of(coords).Across(AllScopes...)
+
+// Find peers in shared scopes between multiple coordinates
+sharedPeers := Peers.Of(coords1, coords2, coords3, ...).AcrossSharedScopes()
+
+// Query all cells in a scope
+columnPeers := Peers.InScope(Column, 5)
+
+// Filter peers containing specific candidates
+candidates, _ := board.NewCandidateSet(1, 2, 3)
+candidatePeers := peers.ContainingCandidates(puzzle, candidates)
+
+// Set operations for combining and filtering
+union := peers1.Union(peers2)               // Combine two peer sets
+intersection := peers1.Intersection(peers2) // Only peers in both sets
+difference := peers1.Except(peers2)         // Peers in first but not second
+
+// Incremental set building
+expanded := peers.With(newCoord)          // Add a single coordinate
+reduced := peers.Without(coord)           // Remove a single coordinate
+
+expanded := peers.Including(newCoords...)       // Add multiple coordinates
+reduced := peers.Excluding(coords...)           // Remove multiple coordinates
+
+// Complex query combining multiple operations
+filtered := Peers.Of(coords).
+Across(Row).
+NotContainingCandidates(puzzle, candidates).
+Except(otherPeers).
+Including(additionalCoord)
+```
+
+The PeerSet API enables techniques to be written as you think about the problem, without wrestling with nested loops and index calculations.
+
+### Generator
+
+> **Status**: Work in progress
+
+### Grader
+
+> **Status**: Work in progress
+
+## Custom Solvers
+
+Create custom solvers with specific technique combinations:
+
+```go
+import "github.com/DavidGudovic/sudoku/internal/core/techniques"
+
+customSolver := solver.NewSudokuSolver([]techniques.Technique{
+    techniques.FuncAdapter(techniques.LastDigit),
+    techniques.FuncAdapter(techniques.NakedSingle),
+    techniques.FuncAdapter(techniques.NakedPair),
+    // Add your own techniques
+})
+
+steps, _ := customSolver.Solve(puzzle)
+```
+
+## Planned Features
 
 ### Web Interface
--- Play Sudoku online
--- Generate puzzles
--- Solve puzzles
--- Step through a solution with detailed explanations and highlighting
--- Grade puzzles
+- Play Sudoku online with interactive UI
+- Generate puzzles of varying difficulty
+- Step-by-step solution viewer with detailed explanations
+- Visual highlighting of affected cells and candidates
+- Difficulty grading for custom puzzles
 
-### Terminal app server over SSH using the Charm libraries
--- Play Sudoku in the terminal over an SSH connection
+### Terminal Application
+- SSH-based terminal UI using Charm libraries
+- Interactive puzzle solving in the terminal
+- Real-time hints and technique explanations
 
 ## Performance
--- The solver is optimized for performance and can solve even the hardest puzzles in <1 ms on modern hardware.
--- Uses bitmasks to represent candidates for constraint propagation and general board state.
--- Uses bitmasks to represent the entire coordinate system of the board and query it into PeerSet's for O(1) access to peers.
--- Very low memory overhead due to efficient data structures.
--- Benchmark tests included to measure and improve performance.
+
+The solver is highly optimized for performance:
+
+- **Speed**: Solves even the hardest puzzles in under 1ms on modern hardware
+- **Efficiency**: Bitmasks for O(1) candidate and peer operations
+- **Memory**: Minimal overhead due to efficient data structures
+- **Benchmarks**: Comprehensive benchmark suite included
+
+```bash
+go test -bench=. ./internal/core/solver
+```
+
+**Benchmark Results:**
+```
+BenchmarkSolver_Easy        <1 ms per operation
+BenchmarkSolver_Vicious     <1 ms per operation
+BenchmarkSolver_Hardest     <1 ms per operation
+```
+
+## License
+
+This project is open source and available under the MIT License.
