@@ -25,7 +25,7 @@ puzzle, _ := board.FromString(
     "000080079",
 )
 
-// Note: Candidates can also be serialized in the string representation using * (e.g., "5*67" means candidates 5, 6, and 7 are possible for that cell)
+// Note: Candidates can also be serialized in the string representation using * (e.g., "130*5*6*7..." means candidates 5, 6, and 7 are possible for the 3rd cell [0, 2])
 
 // Solve using brute force (backtracking)
 bruteForceSolver := solver.NewBruteForceSolver()
