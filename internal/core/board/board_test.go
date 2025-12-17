@@ -194,8 +194,8 @@ func TestBoard_ConstraintEnforcement(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, _ := NewCoordinates(tt.setValue.row, tt.setValue.col)
-			cc, _ := NewCoordinates(tt.setValue.row+1, tt.checkCell.col)
+			c := MustCoordinates(tt.setValue.row, tt.setValue.col)
+			cc := MustCoordinates(tt.setValue.row+1, tt.checkCell.col)
 			err := tt.board.SetValueOnCoords(c, tt.setValue.value)
 			assert.NoError(t, err)
 

@@ -12,7 +12,7 @@ import (
 func NakedSingle(puzzle *board.Board) (Step, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			coords, _ := board.NewCoordinates(row, col)
+			coords := board.MustCoordinates(row, col)
 			candidates := puzzle.CellAt(coords).Candidates()
 
 			if candidates.Count() == 1 {
@@ -36,8 +36,8 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 
 // NakedPair technique:
 //
-// If two cells in a group (row, column, or box) contain the same pair of candidates,
-// those candidates can be removed from all other cells in that group containing them.
+// If two cells in a Scope contain the same pair of candidates,
+// those candidates can be removed from all other cells in that Scope containing them.
 func NakedPair(puzzle *board.Board) (Step, error) {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
@@ -47,7 +47,7 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 				continue
 			}
 
-			found, _ := board.NewCoordinates(row, col)
+			found := board.MustCoordinates(row, col)
 			potentialPairs := Peers.Of(found).Across(AllScopes...).ContainingExactCandidates(*puzzle, candidates)
 
 			if potentialPairs.IsEmpty() {

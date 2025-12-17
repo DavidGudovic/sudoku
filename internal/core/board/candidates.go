@@ -30,6 +30,18 @@ func NewCandidateSet(values ...int) (CandidateSet, error) {
 	return cs, nil
 }
 
+// MustCandidateSet creates a new CandidateSet from the provided values, assuming the caller guarantees valid input.
+// If the input is invalid, there's either a serious bug in the caller or the world view is wrong, therefore it panics.
+func MustCandidateSet(values ...int) CandidateSet {
+	cs, err := NewCandidateSet(values...)
+
+	if err != nil {
+		panic("Impossible: " + err.Error())
+	}
+
+	return cs
+}
+
 // Contains checks if the CandidateSet contains the specified candidate value.
 func (cs *CandidateSet) Contains(value int) bool {
 	return *cs&(1<<value) != 0

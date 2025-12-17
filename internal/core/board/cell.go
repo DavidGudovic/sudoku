@@ -13,13 +13,13 @@ const (
 
 var ErrInvalidCellValue = errors.New("invalid cell value")
 
-// Coordinates represents the row and column of a cell on the Board.
+// Coordinates represents the row and column of a Cell on the Board.
 type Coordinates struct {
 	Row int
 	Col int
 }
 
-// Cell represents a single cell on the Sudoku board.
+// Cell represents a single Cell on the Sudoku board.
 // It holds the current value EmptyCell or MinValue -> MaxValue and a CandidateSet
 type Cell struct {
 	value      int
@@ -38,14 +38,24 @@ func NewCoordinates(row, col int) (Coordinates, error) {
 	}, nil
 }
 
+// MustCoordinates creates a new Coordinates struct assuming the caller guarantees valid input
+// If the input is invalid, there's either a serious bug in the caller or the world view is wrong, therefore it panics
+func MustCoordinates(row, col int) Coordinates {
+	c, err := NewCoordinates(row, col)
+	if err != nil {
+		panic("Impossible: " + err.Error())
+	}
+
+	return c
+}
+
 // CoordsFromIndex converts a 0-based index (left to right, top to bottom) to Coordinates.
 func CoordsFromIndex(index int) (Coordinates, error) {
 	if index < 0 || index >= CellCount {
 		return Coordinates{}, ErrIndexOutOfBounds
 	}
 
-	c, _ := NewCoordinates(index/Size, index%Size)
-	return c, nil
+	return MustCoordinates(index/Size, index%Size), nil
 }
 
 // CoordsFromBoxIndex converts a box index (0-8) and position within the box (0-8) to Coordinates.
@@ -61,9 +71,18 @@ func CoordsFromBoxIndex(boxIndex int, positionInBox int) (Coordinates, error) {
 	row := (boxIndex/BoxSize)*BoxSize + (positionInBox / BoxSize)
 	col := (boxIndex%BoxSize)*BoxSize + (positionInBox % BoxSize)
 
-	c, _ := NewCoordinates(row, col)
+	return MustCoordinates(row, col), nil
+}
 
-	return c, nil
+// MustCoordsFromBoxIndex is like CoordsFromBoxIndex but assumes the caller guarantees valid input.
+// If the input is invalid, there's either a serious bug in the caller or the world view is wrong, therefore it panics.
+func MustCoordsFromBoxIndex(boxIndex int, positionInBox int) Coordinates {
+	c, err := CoordsFromBoxIndex(boxIndex, positionInBox)
+	if err != nil {
+		panic("Impossible: " + err.Error())
+	}
+
+	return c
 }
 
 // NewCell creates a new Cell with an EmptyCell value and AllCandidates available.

@@ -210,6 +210,26 @@ func (b *Board) SetValueOnIndex(index int, value int) error {
 	return b.SetValueOnCoords(c, value)
 }
 
+// MustSetValueOnCoords is like SetValueOnCoords but assumes the caller guarantees the coordinates and value are valid.
+// If they are not, there's either a serious bug in the caller or the world view is wrong, therefore it panics.
+func (b *Board) MustSetValueOnCoords(c Coordinates, value int) {
+	err := b.SetValueOnCoords(c, value)
+
+	if err != nil {
+		panic("Impossible: " + err.Error())
+	}
+}
+
+// MustSetValueOnIndex is like SetValueOnIndex but assumes the caller guarantees the index and value are valid.
+// If they are not, there's either a serious bug in the caller or the world view is wrong, therefore it panics.
+func (b *Board) MustSetValueOnIndex(index int, value int) {
+	err := b.SetValueOnIndex(index, value)
+
+	if err != nil {
+		panic("Impossible: " + err.Error())
+	}
+}
+
 // GetValueByIndex gets the value from Coordinates corresponding to the given 0-based index (left to right, top to bottom),
 // unless the index is illegal, in which case it returns ErrIndexOutOfBounds
 func (b *Board) GetValueByIndex(index int) (int, error) {
@@ -241,7 +261,7 @@ func (b *Board) GetState() State {
 
 	for row := 0; row < Size; row++ {
 		for col := 0; col < Size; col++ {
-			c, _ := NewCoordinates(row, col)
+			c := MustCoordinates(row, col)
 			cell := b.CellAt(c)
 
 			if cell.value == EmptyCell {
@@ -285,7 +305,7 @@ func (b *Board) propagateConstraints(c Coordinates, value int) {
 		b.cells[c.Row][i].candidates.Remove(value)
 		b.cells[i][c.Col].candidates.Remove(value)
 
-		bc, _ := CoordsFromBoxIndex(boxIndex, i)
+		bc := MustCoordsFromBoxIndex(boxIndex, i)
 		b.cells[bc.Row][bc.Col].candidates.Remove(value)
 	}
 }
@@ -307,8 +327,7 @@ func (b *Board) recalculateCandidateSets() {
 			cell := b.cells[row][col]
 
 			if cell.value != EmptyCell {
-				c, _ := NewCoordinates(row, col)
-				b.propagateConstraints(c, cell.value)
+				b.propagateConstraints(MustCoordinates(row, col), cell.value)
 			}
 		}
 	}

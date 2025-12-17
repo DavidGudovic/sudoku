@@ -78,8 +78,7 @@ func (peerQuery) InScope(scope Scope, index int) PeerSet {
 		}
 	case Box:
 		for i := 0; i < board.BoxSize*board.BoxSize; i++ {
-			coords, _ := board.CoordsFromBoxIndex(index, i)
-			ps = ps.With(coords)
+			ps = ps.With(board.MustCoordsFromBoxIndex(index, i))
 		}
 	}
 
@@ -95,20 +94,15 @@ func (w WithCoordinates) Across(scopes ...Scope) PeerSet {
 			switch s {
 			case Row:
 				for col := 0; col < board.Size; col++ {
-					ps = ps.Including(board.Coordinates{Row: c.Row, Col: col})
+					ps = ps.With(board.Coordinates{Row: c.Row, Col: col})
 				}
 			case Column:
 				for row := 0; row < board.Size; row++ {
-					ps = ps.Including(board.Coordinates{Row: row, Col: c.Col})
+					ps = ps.With(board.Coordinates{Row: row, Col: c.Col})
 				}
 			case Box:
-				boxStartRow := (c.Row / board.BoxSize) * board.BoxSize
-				boxStartCol := (c.Col / board.BoxSize) * board.BoxSize
-
-				for r := 0; r < board.BoxSize; r++ {
-					for col := 0; col < board.BoxSize; col++ {
-						ps = ps.Including(board.Coordinates{Row: boxStartRow + r, Col: boxStartCol + col})
-					}
+				for i := 0; i < board.Size; i++ {
+					ps = ps.With(board.MustCoordsFromBoxIndex(c.BoxIndex(), i))
 				}
 			}
 		}
@@ -207,7 +201,7 @@ func (ps PeerSet) HasPeersInCol(col int) bool {
 // HasPeersInBox checks if the PeerSet contains any peers in the specified box.
 func (ps PeerSet) HasPeersInBox(boxIndex int) bool {
 	for i := 0; i < board.BoxSize*board.BoxSize; i++ {
-		coords, _ := board.CoordsFromBoxIndex(boxIndex, i)
+		coords := board.MustCoordsFromBoxIndex(boxIndex, i)
 		if ps.Contains(coords) {
 			return true
 		}
@@ -276,8 +270,7 @@ func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
 			if ps[row]&(1<<col) != 0 {
-				coords, _ := board.NewCoordinates(row, col)
-				seen.Merge(p.CellAt(coords).Candidates())
+				seen.Merge(p.CellAt(board.MustCoordinates(row, col)).Candidates())
 			}
 		}
 	}
@@ -340,7 +333,7 @@ func (ps PeerSet) Slice() []board.Coordinates {
 
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			c, _ := board.NewCoordinates(row, col)
+			c := board.MustCoordinates(row, col)
 			if ps.Contains(c) {
 				coords = append(coords, c)
 			}

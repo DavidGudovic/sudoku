@@ -17,15 +17,16 @@ type Technique interface {
 	Apply(puzzle *board.Board) (Step, error)
 }
 
-// Func is a function type that implements the Technique interface
+// FuncAdapter is a function type that implements the Technique interface
 // This allows simple functions to be used as techniques
-type Func func(*board.Board) (Step, error)
+type FuncAdapter func(*board.Board) (Step, error)
 
-func (tf Func) Apply(puzzle *board.Board) (Step, error) {
+func (tf FuncAdapter) Apply(puzzle *board.Board) (Step, error) {
 	return tf(puzzle)
 }
 
-// Step represents a single solving step taken by a technique
+// Step represents a single solving step taken by a Technique
+// It contains information about the technique used, affected cells, candidates removed, and values placed, useful for explanatory UI's
 type Step struct {
 	Description       string
 	Technique         string
@@ -38,6 +39,7 @@ type Step struct {
 // StepStack represents a stack of Steps, typically used to track the sequence of solving steps
 type StepStack []Step
 
+// MadeProgress returns true if the step resulted in any progress (either placing a value or removing candidates)
 func (s Step) MadeProgress() bool {
 	return s.PlacedValue != nil || s.RemovedCandidates != board.NoCandidates
 }
@@ -62,7 +64,8 @@ func (s Step) ApplyTo(puzzle *board.Board) error {
 
 // MustApplyTo applies the step to the puzzle, panicking if the step cannot be applied.
 //
-// Should only be used when the passed puzzle is the puzzle on which the step was generated.
+// Only to be used when the passed puzzle is the puzzle on which the step was generated.
+// Panicking here indicates a serious error in technique code or world view, invalidating any further program flow.
 func (s Step) MustApplyTo(puzzle *board.Board) Step {
 	if err := s.ApplyTo(puzzle); err != nil {
 		panic("Impossible: " + err.Error())

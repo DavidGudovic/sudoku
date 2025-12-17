@@ -11,7 +11,7 @@ import (
 func TestTechniques(t *testing.T) {
 	tests := []struct {
 		name           string
-		technique      Func
+		technique      FuncAdapter
 		board          string
 		shouldProgress bool
 		expecting      Step

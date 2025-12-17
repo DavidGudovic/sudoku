@@ -8,13 +8,27 @@ import (
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
+const (
+	impossibleCandidateCount = 10
+)
+
+var (
+	ErrNoEmptyCells = errors.New("no empty cells found")
+)
+
 type backtrackStats struct {
 	guesses    int
 	backtracks int
 }
 
-// Backtracking algorithm attempts to solve the puzzle using brute force.
+// Backtracking algorithm attempts to solve the puzzle using brute force in nanosecond range.
 // It does not produce incremental steps but returns the solved puzzle if successful.
+//
+// Optimizations:
+//   - Minimum Remaining Values (MRV) heuristic to select the next cell to fill.
+//   - Constraint propagation (handled by the board) to reduce the search space.
+//   - Forward checking (also handled by the board), if any board.EmptyCell has board.NoCandidates we backtrack.
+//   - Early termination upon finding a solution.
 func Backtracking(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
 
@@ -63,12 +77,12 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 			continue
 		}
 
-		_ = puzzle.SetValueOnCoords(c, val)
+		puzzle.MustSetValueOnCoords(c, val)
 		stats.guesses++
 
 		switch puzzle.GetState() {
 		case board.Invalid:
-			_ = puzzle.SetValueOnCoords(c, board.EmptyCell)
+			puzzle.MustSetValueOnCoords(c, board.EmptyCell)
 			stats.backtracks++
 		case board.Solved:
 			return puzzle, nil
@@ -79,7 +93,7 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 				return solvedPuzzle, nil
 			}
 
-			_ = puzzle.SetValueOnCoords(c, board.EmptyCell)
+			puzzle.MustSetValueOnCoords(c, board.EmptyCell)
 			stats.backtracks++
 		}
 	}
@@ -88,14 +102,15 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 }
 
 // findSuitableCell is a helper that returns the coordinates of an empty cell with the least amount candidates
-// Searches left to right, top to bottom.
+//
+// In CS terms, this is the Minimum Remaining Values (MRV) heuristic
 func findSuitableCell(puzzle board.Board) (board.Coordinates, error) {
-	leastCandidates := 10 // Impossible value.
+	leastCandidates := impossibleCandidateCount
 	var bestCell board.Coordinates
 
 	for row := 0; row < board.Size; row++ {
 		for col := 0; col < board.Size; col++ {
-			c, _ := board.NewCoordinates(row, col)
+			c := board.MustCoordinates(row, col)
 
 			if puzzle.CellAt(c).Value() != board.EmptyCell {
 				continue
@@ -114,9 +129,9 @@ func findSuitableCell(puzzle board.Board) (board.Coordinates, error) {
 		}
 	}
 
-	if leastCandidates != 10 {
+	if leastCandidates != impossibleCandidateCount {
 		return bestCell, nil
 	}
 
-	return board.Coordinates{}, errors.New("no empty cells found")
+	return board.Coordinates{}, ErrNoEmptyCells
 }
