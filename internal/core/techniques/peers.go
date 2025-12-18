@@ -1,13 +1,14 @@
 package techniques
 
 import (
+	"iter"
 	"math/bits"
 
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
 var (
-	NoCells          = PeerSet{}
+	NoPeers          = PeerSet{}
 	FullRow   uint16 = 0b111111111
 	AllScopes        = []Scope{Row, Column, Box}
 )
@@ -62,12 +63,12 @@ func (peerQuery) All() PeerSet {
 
 // Empty finalizes the query with an empty PeerSet.
 func (peerQuery) Empty() PeerSet {
-	return NoCells
+	return NoPeers
 }
 
 // InScope finalizes the query with a PeerSet containing all board.Coordinates in the specified Scope and index.
 func (peerQuery) InScope(scope Scope, index int) PeerSet {
-	ps := NoCells
+	ps := NoPeers
 
 	switch scope {
 	case Row:
@@ -174,7 +175,7 @@ func (ps PeerSet) Without(c board.Coordinates) PeerSet {
 
 // Union returns a new PeerSet that is the union of this set and another.
 func (ps PeerSet) Union(other PeerSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
 	for r := 0; r < board.Size; r++ {
 		result[r] = ps[r] | other[r]
@@ -244,7 +245,7 @@ func (ps PeerSet) Excluding(coords ...board.Coordinates) PeerSet {
 
 // Except returns a new PeerSet excluding the given PeerSet
 func (ps PeerSet) Except(other PeerSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
 	for r := 0; r < board.Size; r++ {
 		result[r] = ps[r] &^ other[r]
@@ -255,7 +256,7 @@ func (ps PeerSet) Except(other PeerSet) PeerSet {
 
 // Intersection returns a new PeerSet that is the intersection of this set and another.
 func (ps PeerSet) Intersection(other PeerSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
 	for r := 0; r < board.Size; r++ {
 		result[r] = ps[r] & other[r]
@@ -266,51 +267,53 @@ func (ps PeerSet) Intersection(other PeerSet) PeerSet {
 
 // IsEmpty checks if the PeerSet is empty.
 func (ps PeerSet) IsEmpty() bool {
-	return ps == NoCells
+	return ps == NoPeers
 }
 
 // Candidates return the union of candidates from all board.Cell's in this PeerSet on a given board.Board.
 func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
 	seen := board.NoCandidates
 
-	ps.ForEach(func(c board.Coordinates) {
+	for c := range ps.Populated() {
 		seen.Merge(p.CellAt(c).Candidates())
-	})
+	}
 
 	return seen
 }
 
 // ContainingCandidates filters the PeerSet to only include cells that contain any of the specified candidates on the given board.Board.
 func (ps PeerSet) ContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
-	ps.ForEach(func(c board.Coordinates) {
+	for c := range ps.Populated() {
 		set := p.CellAt(c).Candidates()
+
 		if set.Intersection(candidates) != board.NoCandidates {
 			result[c.Row] |= 1 << c.Col
 		}
-	})
+	}
 
 	return result
 }
 
 // NotContainingCandidates filters the PeerSet to only include cells that do not contain the specified candidates on the given board.Board.
 func (ps PeerSet) NotContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
-	ps.ForEach(func(c board.Coordinates) {
+	for c := range ps.Populated() {
 		set := p.CellAt(c).Candidates()
+
 		if set.Intersection(candidates) == board.NoCandidates {
 			result[c.Row] |= 1 << c.Col
 		}
-	})
+	}
 
 	return result
 }
 
 // ContainingExactCandidates filters the PeerSet to only include cells that contain exactly the specified candidates on the given board.Board.
 func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
-	result := NoCells
+	result := NoPeers
 
 	coords := ps.Slice()
 	for _, c := range coords {
@@ -324,17 +327,19 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 	return result
 }
 
-// ForEach executes a function for every coordinate present in the PeerSet.
+// Populated executes a function for every coordinate present in the PeerSet.
 // It uses bit-scanning to skip empty cells, making it much faster than 9x9 loops.
-func (ps PeerSet) ForEach(fn func(c board.Coordinates)) {
-	for r := 0; r < board.Size; r++ {
-		mask := ps[r]
-		for mask != 0 {
-			c := bits.TrailingZeros16(mask)
-
-			fn(board.MustCoordinates(r, c))
-
-			mask &^= 1 << c
+func (ps PeerSet) Populated() iter.Seq[board.Coordinates] {
+	return func(yield func(board.Coordinates) bool) {
+		for r := 0; r < board.Size; r++ {
+			mask := ps[r]
+			for mask != 0 {
+				c := bits.TrailingZeros16(mask)
+				if !yield(board.MustCoordinates(r, c)) {
+					return
+				}
+				mask &^= 1 << c
+			}
 		}
 	}
 }
