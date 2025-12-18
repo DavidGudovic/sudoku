@@ -223,9 +223,9 @@ cpu: AMD Ryzen 7 9800X3D 8-Core Processor
 
 - **Backtracking alone**: 
 ```
-BenchBacktracking/Easy-16         	       62132    19149 ns/op	 80 B/op   1 allocs/op
-BenchBacktracking/Vicious-16      	        1720   697738 ns/op	 97 B/op   3 allocs/op
-BenchBacktracking/Beyond_Hell-16  	         981  1205182 ns/op	 99 B/op   3 allocs/op
+BenchBacktracking/Easy-16         	         62132    19149 ns/op	 80 B/op   1 allocs/op
+BenchBacktracking/Vicious-16      	          1720   697738 ns/op	 97 B/op   3 allocs/op
+BenchBacktracking/Beyond_Hell-16  	           981  1205182 ns/op	 99 B/op   3 allocs/op
 BenchBacktracking/AlEscargot_(2006)-16          2917   410264 ns/op	 80 B/op   1 allocs/op
 ```
 
