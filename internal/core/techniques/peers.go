@@ -7,6 +7,8 @@ import (
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
+//go:generate stringer -type=Scope
+
 var (
 	NoPeers          = PeerSet{}
 	FullRow   uint16 = 0b111111111
