@@ -7,49 +7,48 @@ import (
 )
 
 // HiddenSingle technique:
-// For any value If in any row or box only once cell has the value as a candidate, the value must be there.
+//
+// For any value If in any row or box only one cell has the value as a candidate, the value must be there.
 // This is true even when the cell has more than one candidate itself.
 func HiddenSingle(puzzle *board.Board) (Step, error) {
-	p := Peers.All()
+	scopes := []struct {
+		scope Scope
+		index int
+	}{
+		{Row, 0},
+		{Column, 0},
+		{Box, 0},
+	}
 
-	for coords := range p.Populated() {
+	for coords := range Peers.All().Populated() {
 		candidates := puzzle.CellAt(coords).Candidates()
 
-		if candidates.Count() < 2 {
+		if candidates.Count() < 2 { // Cannot be hidden without at least 2 candidates
 			continue
 		}
 
-		var scope Scope
-		var scopeIndex int
+		scopes[0].index = coords.Row
+		scopes[1].index = coords.Col
+		scopes[2].index = coords.BoxIndex()
 
 		for _, candidate := range candidates.Slice() {
-			boxPeers := Peers.Of(coords).Across(Box).ContainingCandidates(*puzzle, board.MustCandidateSet(candidate))
-			rowPeers := Peers.Of(coords).Across(Row).ContainingCandidates(*puzzle, board.MustCandidateSet(candidate))
-			colPeers := Peers.Of(coords).Across(Column).ContainingCandidates(*puzzle, board.MustCandidateSet(candidate))
+			for _, s := range scopes {
+				scopedPeers := Peers.Of(coords).Across(s.scope)
 
-			if boxPeers == NoPeers {
-				scope = Box
-				scopeIndex = coords.BoxIndex()
-			} else if rowPeers == NoPeers {
-				scope = Row
-				scopeIndex = coords.Row
-			} else if colPeers == NoPeers {
-				scope = Column
-				scopeIndex = coords.Col
-			} else {
-				continue
+				if scopedPeers.ContainingCandidates(*puzzle, board.MustCandidateSet(candidate)) == NoPeers {
+					step := Step{
+						Technique:         "HiddenSingle (" + s.scope.String() + ")",
+						AffectedCells:     []board.Coordinates{coords},
+						ReasonCells:       scopedPeers.EmptyCells(*puzzle).Slice(),
+						Description:       fmt.Sprint("None of the empty cells in ", s.scope, " ", s.index, " can hold a ", candidate, " except ", coords, ", placing a ", candidate),
+						RemovedCandidates: board.MustCandidateSet(candidate),
+						PlacedValue:       &candidate,
+					}
+
+					return step.MustApplyTo(puzzle), nil
+				}
 			}
 
-			step := Step{
-				Technique:         "HiddenSingle (" + scope.String() + ")",
-				AffectedCells:     []board.Coordinates{coords},
-				ReasonCells:       Peers.Of(coords).Across(scope).EmptyCells(*puzzle).Slice(),
-				Description:       fmt.Sprint("None of the empty cells in ", scope, " ", scopeIndex, " can hold a ", candidate, " except ", coords, ", placing a ", candidate),
-				RemovedCandidates: board.MustCandidateSet(candidate),
-				PlacedValue:       &candidate,
-			}
-
-			return step.MustApplyTo(puzzle), nil
 		}
 	}
 
