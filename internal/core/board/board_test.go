@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBoard_GetState(t *testing.T) {
+func TestBoard_State(t *testing.T) {
 	tests := []struct {
 		name  string
 		board string
@@ -43,7 +43,7 @@ func TestBoard_GetState(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			isUnconstrainedBoard := tt.want == Invalid
 			board, _ := FromString(tt.board, isUnconstrainedBoard)
-			assert.Equal(t, tt.want, board.GetState())
+			assert.Equal(t, tt.want, board.State())
 		})
 	}
 }

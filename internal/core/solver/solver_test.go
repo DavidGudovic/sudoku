@@ -44,12 +44,12 @@ func TestBruteForceSolver(t *testing.T) {
 
 			if tt.wantSolved {
 				assert.NoError(t, err)
-				assert.Equal(t, board.Solved, boardAfterAttempt.GetState())
+				assert.Equal(t, board.Solved, boardAfterAttempt.State())
 				return
 			}
 
 			assert.Error(t, err, ErrUnsolvablePuzzle)
-			assert.Equal(t, board.Unsolved, boardAfterAttempt.GetState())
+			assert.Equal(t, board.Unsolved, boardAfterAttempt.State())
 		})
 	}
 }

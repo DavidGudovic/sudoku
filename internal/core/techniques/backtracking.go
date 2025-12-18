@@ -32,7 +32,7 @@ type backtrackStats struct {
 func Backtracking(puzzle *board.Board) (Step, error) {
 	stats := backtrackStats{}
 
-	if puzzle.IsUnconstrained() && puzzle.GetState() == board.Invalid {
+	if puzzle.IsUnconstrained() && puzzle.State() == board.Invalid {
 		return Step{}, ErrCannotSolve
 	}
 
@@ -80,7 +80,7 @@ func backtrackSolve(puzzle board.Board, stats *backtrackStats) (board.Board, err
 		puzzle.MustSetValueOnCoords(c, val)
 		stats.guesses++
 
-		switch puzzle.GetState() {
+		switch puzzle.State() {
 		case board.Invalid:
 			puzzle.MustSetValueOnCoords(c, board.EmptyCell)
 			stats.backtracks++

@@ -83,7 +83,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepSt
 		}
 	}
 
-	if puzzle.GetState() == board.Solved {
+	if puzzle.State() == board.Solved {
 		return puzzle, steps, nil
 	}
 

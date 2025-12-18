@@ -212,28 +212,28 @@ steps, _ := customSolver.Solve(puzzle)
 - Real-time hints and technique explanations
 
 ## Performance
-
-The solver is highly optimized for performance:
-
 - **Speed**: Solves even the hardest puzzles in ~ 1ms on modern hardware
 - **Efficiency**: Bitmasks for O(1) candidate and peer operations
 - **Memory**: Minimal overhead due to efficient data structures
 - **Benchmarks**: Comprehensive benchmark suite included
 
-```bash
-go test -bench=. ./internal/core/solver
+```
+cpu: AMD Ryzen 7 9800X3D 8-Core Processor
 ```
 
-**Benchmark Results:**
-- With Solver orchestration overhead:
+- **Backtracking alone**: 
 ```
-cpu: AMD Ryzen 7 9800X3D 8-Core Processor           
-
-BenchmarkBruteForceSolver/Easy-16      57795     20244 ns/op   1665 B/op   4 allocs/op
-BenchmarkBruteForceSolver/Vicious-16    1676    703317 ns/op   1681 B/op   6 allocs/op
-BenchmarkBruteForceSolver/Hardest-16     978   1202976 ns/op   1682 B/op   6 allocs/op
+BenchBacktracking/Easy-16         	       62132    19149 ns/op	 80 B/op   1 allocs/op
+BenchBacktracking/Vicious-16      	        1720   697738 ns/op	 97 B/op   3 allocs/op
+BenchBacktracking/Beyond_Hell-16  	         981  1205182 ns/op	 99 B/op   3 allocs/op
+BenchBacktracking/AlEscargot_(2006)-16          2917   410264 ns/op	 80 B/op   1 allocs/op
 ```
 
+- **Calculating board state**: 
+```
+BenchBoard_State/Known_unsolved_board-16      9422727   128.0 ns/op	  0 B/op   0 allocs/op
+BenchBoard_State/Known_solved_board-16        5626734   211.1 ns/op	  0 B/op   0 allocs/op
+```
 ## License
 
 This project is open source and available under the MIT License.

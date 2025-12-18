@@ -252,9 +252,9 @@ func (b *Board) CellAt(coordinates Coordinates) Cell {
 	return b.cells[coordinates.Row][coordinates.Col]
 }
 
-// GetState resolves the current state of the board into one of [ Invalid, Unsolved, Solved]
+// State resolves the current state of the board into one of [ Invalid, Unsolved, Solved]
 // See [State] for more information.
-func (b *Board) GetState() State {
+func (b *Board) State() State {
 	var rows [Size]CandidateSet
 	var cols [Size]CandidateSet
 	var boxes [BoxCount]CandidateSet
