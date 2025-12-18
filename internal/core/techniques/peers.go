@@ -329,6 +329,33 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 	return result
 }
 
+// EmptyCells filters the PeerSet to only include cells that are empty on the given board.Board.
+func (ps PeerSet) EmptyCells(p board.Board) PeerSet {
+	result := NoPeers
+
+	for c := range ps.Populated() {
+		if p.CellAt(c).IsEmpty() {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// ContainingValues filters the PeerSet to only include cells that contain any of the specified values on the given board.Board.
+func (ps PeerSet) ContainingValues(p board.Board, values ...int) PeerSet {
+	result := NoPeers
+
+	valueSet := board.MustCandidateSet(values...)
+	for c := range ps.Populated() {
+		if valueSet.Contains(p.CellAt(c).Value()) {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
 // Populated executes a function for every coordinate present in the PeerSet.
 // It uses bit-scanning to skip empty cells, making it much faster than 9x9 loops.
 func (ps PeerSet) Populated() iter.Seq[board.Coordinates] {
