@@ -276,7 +276,7 @@ func (ps PeerSet) IsEmpty() bool {
 func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
 	seen := board.NoCandidates
 
-	for c := range ps.Populated() {
+	for c := range ps.Each() {
 		seen.Merge(p.CellAt(c).Candidates())
 	}
 
@@ -287,7 +287,7 @@ func (ps PeerSet) Candidates(p board.Board) board.CandidateSet {
 func (ps PeerSet) ContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
 	result := NoPeers
 
-	for c := range ps.Populated() {
+	for c := range ps.Each() {
 		set := p.CellAt(c).Candidates()
 
 		if set.Intersection(candidates) != board.NoCandidates {
@@ -302,7 +302,7 @@ func (ps PeerSet) ContainingCandidates(p board.Board, candidates board.Candidate
 func (ps PeerSet) NotContainingCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
 	result := NoPeers
 
-	for c := range ps.Populated() {
+	for c := range ps.Each() {
 		set := p.CellAt(c).Candidates()
 
 		if set.Intersection(candidates) == board.NoCandidates {
@@ -333,7 +333,7 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 func (ps PeerSet) EmptyCells(p board.Board) PeerSet {
 	result := NoPeers
 
-	for c := range ps.Populated() {
+	for c := range ps.Each() {
 		if p.CellAt(c).IsEmpty() {
 			result = result.With(c)
 		}
@@ -347,7 +347,7 @@ func (ps PeerSet) ContainingValues(p board.Board, values ...int) PeerSet {
 	result := NoPeers
 
 	valueSet := board.MustCandidateSet(values...)
-	for c := range ps.Populated() {
+	for c := range ps.Each() {
 		if valueSet.Contains(p.CellAt(c).Value()) {
 			result = result.With(c)
 		}
@@ -356,9 +356,9 @@ func (ps PeerSet) ContainingValues(p board.Board, values ...int) PeerSet {
 	return result
 }
 
-// Populated executes a function for every coordinate present in the PeerSet.
+// Each executes a function for every coordinate present in the PeerSet.
 // It uses bit-scanning to skip empty cells, making it much faster than 9x9 loops.
-func (ps PeerSet) Populated() iter.Seq[board.Coordinates] {
+func (ps PeerSet) Each() iter.Seq[board.Coordinates] {
 	return func(yield func(board.Coordinates) bool) {
 		for r := 0; r < board.Size; r++ {
 			mask := ps[r]

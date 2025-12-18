@@ -20,7 +20,7 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 			candidates = puzzle.CellAt(coords).Candidates()
 
 			if candidates.Count() == 1 {
-				val = candidates.Slice()[0]
+				val = candidates.First()
 				targetCellCandidates := board.MustCandidateSet(val)
 
 				step := Step{

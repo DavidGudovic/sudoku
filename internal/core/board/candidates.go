@@ -1,6 +1,7 @@
 package board
 
 import (
+	"iter"
 	"math/bits"
 	"strconv"
 	"strings"
@@ -87,25 +88,42 @@ func (cs *CandidateSet) Count() int {
 func (cs *CandidateSet) Slice() []int {
 	var values []int
 
-	for val := MinValue; val <= MaxValue; val++ {
-		if cs.Contains(val) {
-			values = append(values, val)
-		}
+	for val := range cs.Each() {
+		values = append(values, val)
 	}
 
 	return values
 }
 
+// Each executes a function for every candidate present in the CandidateSet.
+// It uses bit-scanning to skip empty candidates.
+func (cs *CandidateSet) Each() iter.Seq[int] {
+	return func(yield func(int) bool) {
+		mask := *cs
+		for mask != 0 {
+			c := bits.TrailingZeros16(uint16(mask))
+			if !yield(c) {
+				return
+			}
+			mask &^= 1 << c
+		}
+	}
+}
+
+// First returns the first candidate value in the CandidateSet 1 - 9, or 0 if empty.
+func (cs *CandidateSet) First() int {
+	return bits.TrailingZeros16(uint16(*cs))
+}
+
 // String converts the CandidateSet to a comma-separated list of integer values of the candidates.
 func (cs *CandidateSet) String() string {
 	sb := strings.Builder{}
-	slice := cs.Slice()
 
-	for i, val := range slice {
-		sb.WriteString(strconv.Itoa(val))
-		if i < len(slice)-1 {
+	for val := range cs.Each() {
+		if sb.Len() > 0 {
 			sb.WriteString(",")
 		}
+		sb.WriteString(strconv.Itoa(val))
 	}
 
 	return sb.String()
