@@ -106,6 +106,41 @@ func TestTechniques(t *testing.T) {
 			shouldProgress: false,
 			expecting:      Step{},
 		},
+		{
+			name:           "HiddenSingle (Row)",
+			technique:      HiddenSingle,
+			board:          "000000020000000000857034000000000000000000000000000000000000000000000000000000000",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "None of the empty cells in R2 can hold a 2 except R2C3, placing a 2",
+				Technique:         "HiddenSingle",
+				ReasonCells:       []board.Coordinates{{Row: 2, Col: 6}, {Row: 2, Col: 7}, {Row: 2, Col: 8}},
+				AffectedCells:     []board.Coordinates{{Row: 2, Col: 3}},
+				RemovedCandidates: 0b0000000100,
+				PlacedValue:       ptr.To(2),
+			},
+		},
+		{
+			name:           "HiddenSingle (Box)",
+			technique:      HiddenSingle,
+			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "None of the empty cells in box 8 can hold a 6 except R6C6, placing a 6",
+				Technique:         "HiddenSingle",
+				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}, {Row: 8, Col: 8}},
+				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
+				RemovedCandidates: 0b0000100000,
+				PlacedValue:       ptr.To(6),
+			},
+		},
+		{
+			name:           "HiddenSingle (No Progress)",
+			technique:      NakedPair,
+			board:          "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
 	}
 
 	for _, tt := range tests {
