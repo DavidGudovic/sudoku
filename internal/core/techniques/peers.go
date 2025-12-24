@@ -317,8 +317,7 @@ func (ps PeerSet) NotContainingCandidates(p board.Board, candidates board.Candid
 func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.CandidateSet) PeerSet {
 	result := NoPeers
 
-	coords := ps.Slice()
-	for _, c := range coords {
+	for c := range ps.Each() {
 		target := p.CellAt(c).Candidates()
 
 		if target == candidates {
@@ -374,6 +373,8 @@ func (ps PeerSet) Each() iter.Seq[board.Coordinates] {
 }
 
 // Slice converts to a slice of board.Coordinates.
+// Used for when the caller needs a slice, e.g. for Step.AffectedCells.
+// Should not be used for iteration, instead use Each()
 func (ps PeerSet) Slice() []board.Coordinates {
 	var coords []board.Coordinates
 
