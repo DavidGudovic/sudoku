@@ -57,7 +57,7 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 			var affected PeerSet
 			var pair board.Coordinates
 
-			for _, peer := range potentialPairs.Slice() {
+			for peer := range potentialPairs.Each() {
 				affected = Peers.Of(found, peer).AcrossSharedScopes().ContainingCandidates(*puzzle, candidates)
 
 				if affected.IsEmpty() {
@@ -84,5 +84,13 @@ func NakedPair(puzzle *board.Board) (Step, error) {
 		}
 	}
 
+	return Step{}, ErrCannotProgress
+}
+
+// NakedTriple technique:
+//
+// If three cells in a Scope contain the same triplet of candidates,
+// those candidates can be removed from all other cells in that Scope containing them.
+func NakedTriple(puzzle *board.Board) (Step, error) {
 	return Step{}, ErrCannotProgress
 }
