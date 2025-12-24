@@ -10,25 +10,20 @@ import (
 //
 // If a cell has only one candidate left, place it there.
 func NakedSingle(puzzle *board.Board) (Step, error) {
-	for row := 0; row < board.Size; row++ {
-		for col := 0; col < board.Size; col++ {
-			coords := board.MustCoordinates(row, col)
-			candidates := puzzle.CellAt(coords).Candidates()
+	for c := range Peers.All().EmptyCells(*puzzle).ContainingCountCandidates(*puzzle, 1).Each() {
+		candidates := puzzle.CellAt(c).Candidates()
+		val := candidates.First()
 
-			if candidates.Count() == 1 {
-				val := candidates.First()
-				step := Step{
-					Technique:         "NakedSingle",
-					AffectedCells:     []board.Coordinates{coords},
-					ReasonCells:       Peers.Of(coords).Across(AllScopes...).Slice(),
-					RemovedCandidates: candidates,
-					PlacedValue:       &val,
-					Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", coords, ", placing a ", val),
-				}
-
-				return step.MustApplyTo(puzzle), nil
-			}
+		step := Step{
+			Technique:         "NakedSingle",
+			AffectedCells:     []board.Coordinates{c},
+			ReasonCells:       Peers.Of(c).Across(AllScopes...).Slice(),
+			RemovedCandidates: candidates,
+			PlacedValue:       &val,
+			Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", c, ", placing a ", val),
 		}
+
+		return step.MustApplyTo(puzzle), nil
 	}
 
 	return Step{}, ErrCannotProgress
@@ -58,7 +53,7 @@ func NakedQuad(puzzle *board.Board) (Step, error) {
 	return nakedMultiple(puzzle, 4, "NakedQuad")
 }
 
-// nakedMultiple is a generalized version of NakedTriple and NakedQuad
+// nakedMultiple is a helper function for NakedPair, NakedTriple, and NakedQuad techniques.
 func nakedMultiple(puzzle *board.Board, count int, techniqueName string) (Step, error) {
 	for i := 0; i < board.Size; i++ {
 		for _, scope := range AllScopes {
