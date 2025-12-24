@@ -3,6 +3,7 @@ package techniques
 import (
 	"iter"
 	"math/bits"
+	"strings"
 
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
@@ -328,12 +329,55 @@ func (ps PeerSet) ContainingExactCandidates(p board.Board, candidates board.Cand
 	return result
 }
 
+// ContainingCountCandidates filters the PeerSet to only include cells that contain exactly the specified candidates on the given board.Board.
+func (ps PeerSet) ContainingCountCandidates(p board.Board, count int) PeerSet {
+	result := NoPeers
+
+	for c := range ps.Each() {
+		candidates := p.CellAt(c).Candidates()
+
+		if candidates.Count() == count {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// ContainingMaxCandidates filters the PeerSet to only include cells that contain at most the specified number of candidates on the given board.Board.
+func (ps PeerSet) ContainingMaxCandidates(p board.Board, max int) PeerSet {
+	result := NoPeers
+
+	for c := range ps.Each() {
+		candidates := p.CellAt(c).Candidates()
+
+		if candidates.Count() <= max {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
 // EmptyCells filters the PeerSet to only include cells that are empty on the given board.Board.
 func (ps PeerSet) EmptyCells(p board.Board) PeerSet {
 	result := NoPeers
 
 	for c := range ps.Each() {
 		if p.CellAt(c).IsEmpty() {
+			result = result.With(c)
+		}
+	}
+
+	return result
+}
+
+// NonEmptyCells filters the PeerSet to only include cells that are non-empty on the given board.Board.
+func (ps PeerSet) NonEmptyCells(p board.Board) PeerSet {
+	result := NoPeers
+
+	for c := range ps.Each() {
+		if !p.CellAt(c).IsEmpty() {
 			result = result.With(c)
 		}
 	}
@@ -388,4 +432,46 @@ func (ps PeerSet) Slice() []board.Coordinates {
 	}
 
 	return coords
+}
+
+// String returns a string representation of the PeerSet
+func (ps PeerSet) String() string {
+	sb := strings.Builder{}
+
+	for val := range ps.Each() {
+		if sb.Len() > 0 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(val.String())
+	}
+
+	return sb.String()
+}
+
+// Subsets generates all possible PeerSet combinations of size n from the given PeerSet.
+func Subsets(ps PeerSet, size int) []PeerSet {
+	if size == 0 {
+		return []PeerSet{NoPeers}
+	}
+
+	if ps.Count() < size {
+		return nil
+	}
+
+	var first board.Coordinates
+	for c := range ps.Each() {
+		first = c
+		break
+	}
+
+	rest := ps.Without(first)
+
+	var results []PeerSet
+	for _, combo := range Subsets(rest, size-1) {
+		results = append(results, combo.With(first))
+	}
+
+	results = append(results, Subsets(rest, size)...)
+
+	return results
 }
