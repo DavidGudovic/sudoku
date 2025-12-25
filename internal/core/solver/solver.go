@@ -31,7 +31,7 @@ func NewSudokuSolver(techniques []techniques.Technique) *SudokuSolver {
 func NewBruteForceSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
-			techniques.FuncAdapter(techniques.Backtracking),
+			techniques.Backtracking,
 		},
 	}
 }
@@ -40,15 +40,15 @@ func NewBruteForceSolver() *SudokuSolver {
 func NewLogicalSolver() *SudokuSolver {
 	return &SudokuSolver{
 		techniques: []techniques.Technique{
-			techniques.FuncAdapter(techniques.LastDigit),
-			techniques.FuncAdapter(techniques.NakedSingle),
-			techniques.FuncAdapter(techniques.HiddenSingle),
-			techniques.FuncAdapter(techniques.NakedPair),
-			techniques.FuncAdapter(techniques.HiddenPair),
-			techniques.FuncAdapter(techniques.PointingPair),
-			techniques.FuncAdapter(techniques.XWing),
-			techniques.FuncAdapter(techniques.Skyscraper),
-			techniques.FuncAdapter(techniques.TwoStringKite),
+			techniques.LastDigit,
+			techniques.NakedSingle,
+			techniques.HiddenSingle,
+			techniques.NakedPair,
+			techniques.HiddenPair,
+			techniques.PointingPair,
+			techniques.XWing,
+			techniques.Skyscraper,
+			techniques.TwoStringKite,
 		},
 	}
 }
@@ -63,7 +63,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepSt
 
 		// Attempt each technique in order
 		for _, technique := range s.techniques {
-			step, err := technique.Apply(&puzzle)
+			step, err := technique(&puzzle)
 
 			if err != nil {
 				return puzzle, nil, err
@@ -93,7 +93,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepSt
 // TakeAStep applies the next applicable technique to the puzzle and returns the updated board and the step taken.
 func (s *SudokuSolver) TakeAStep(puzzle board.Board) (board.Board, techniques.Step, error) {
 	for _, technique := range s.techniques {
-		step, err := technique.Apply(&puzzle)
+		step, err := technique(&puzzle)
 
 		if err != nil {
 			return puzzle, techniques.Step{}, err

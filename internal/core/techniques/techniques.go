@@ -12,18 +12,8 @@ var (
 	ErrUnapplicablePuzzle = errors.New("step cannot be applied to puzzle, wrong puzzle? ")
 )
 
-// Technique represents a Sudoku solving technique that can be applied to a puzzle
-type Technique interface {
-	Apply(puzzle *board.Board) (Step, error)
-}
-
-// FuncAdapter is a function type that implements the Technique interface
-// This allows simple functions to be used as techniques
-type FuncAdapter func(*board.Board) (Step, error)
-
-func (tf FuncAdapter) Apply(puzzle *board.Board) (Step, error) {
-	return tf(puzzle)
-}
+// Technique is a function type that implements a Sudoku solving technique.
+type Technique func(*board.Board) (Step, error)
 
 // Step represents a single solving step taken by a Technique
 // It contains information about the technique used, affected cells, candidates removed, and values placed, useful for explanatory UI's
