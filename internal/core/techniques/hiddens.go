@@ -57,6 +57,75 @@ func HiddenSingle(puzzle *board.Board) (Step, error) {
 	return Step{}, ErrCannotProgress
 }
 
-func HiddenPair(_ *board.Board) (Step, error) {
-	return Step{}, nil
+// HiddenPair technique:
+//
+// If two candidates can only fit in the same two cells of a Scope, and those cells contain other candidates as well,
+// those other candidates can be removed from those cells.
+func HiddenPair(puzzle *board.Board) (Step, error) {
+	return hiddenMultiple(puzzle, 2, "HiddenPair")
+}
+
+// HiddenTriple technique:
+//
+// If three candidates can only fit in the same three cells of a Scope, and those cells contain other candidates as well,
+// those other candidates can be removed from those cells.
+func HiddenTriple(puzzle *board.Board) (Step, error) {
+	return hiddenMultiple(puzzle, 3, "HiddenTriple")
+}
+
+// HiddenQuad technique:
+//
+// If four candidates can only fit in the same four cells of a Scope, and those cells contain other candidates as well,
+// those other candidates can be removed from those cells.
+func HiddenQuad(puzzle *board.Board) (Step, error) {
+	return hiddenMultiple(puzzle, 4, "HiddenQuad")
+}
+
+// hiddenMultiple is a helper function for HiddenPair, HiddenTriple, and HiddenQuad techniques.
+func hiddenMultiple(puzzle *board.Board, count int, techniqueName string) (Step, error) {
+	for i := 0; i < board.Size; i++ {
+		for _, scope := range AllScopes {
+			inScope := Peers.InScope(scope, i).EmptyCells(*puzzle)
+
+			if inScope.Count() < count {
+				continue
+			}
+
+			peerCandidates := inScope.Candidates(*puzzle)
+
+			if peerCandidates.Count() <= count { // No hidden multiples possible, if its equal its naked, not hidden
+				continue
+			}
+
+			combinations := board.CandidateSubsets(peerCandidates, count)
+
+			for _, combo := range combinations {
+				potentialMultiples := inScope.ContainingCandidates(*puzzle, combo)
+
+				if potentialMultiples.Count() != count {
+					continue
+				}
+
+				affected := potentialMultiples.Candidates(*puzzle)
+
+				affected.Exclude(combo)
+
+				if affected == board.NoCandidates {
+					continue
+				}
+
+				step := Step{
+					Technique:         techniqueName,
+					AffectedCells:     potentialMultiples.Slice(),
+					ReasonCells:       potentialMultiples.Slice(),
+					Description:       fmt.Sprint(fmt.Sprint(count, " candidates [", combo.String(), "] in ", scope.String(), "-", i, " can only fit in ", count, " cells [", potentialMultiples.String(), "], therefore they must be placed there, removing other candidates from those cells")),
+					RemovedCandidates: affected,
+				}
+
+				return step.MustApplyTo(puzzle), nil
+			}
+		}
+	}
+
+	return Step{}, ErrCannotProgress
 }
