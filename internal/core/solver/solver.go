@@ -45,10 +45,11 @@ func NewLogicalSolver() *SudokuSolver {
 			techniques.HiddenSingle,
 			techniques.NakedPair,
 			techniques.HiddenPair,
+			techniques.NakedTriple,
+			techniques.HiddenTriple,
+			techniques.NakedQuad,
+			techniques.HiddenQuad,
 			techniques.LockedCandidates,
-			techniques.XWing,
-			techniques.Skyscraper,
-			techniques.TwoStringKite,
 		},
 	}
 }
@@ -66,7 +67,7 @@ func (s *SudokuSolver) Solve(puzzle board.Board) (board.Board, techniques.StepSt
 			step, err := technique(&puzzle)
 
 			if err != nil {
-				return puzzle, nil, err
+				continue
 			}
 
 			if step.MadeProgress() {

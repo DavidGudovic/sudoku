@@ -7,10 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBruteForceSolver(t *testing.T) {
-	solver := NewBruteForceSolver()
-
-	tests := []struct {
+func testCases() []struct {
+	name       string
+	puzzle     string
+	wantSolved bool
+} {
+	return []struct {
 		name       string
 		puzzle     string
 		wantSolved bool
@@ -21,8 +23,18 @@ func TestBruteForceSolver(t *testing.T) {
 			wantSolved: true,
 		},
 		{
+			name:       "Moderately Hard",
+			puzzle:     "076000000380000000000104078000500009809307020007201030000970050000000300002000400",
+			wantSolved: true,
+		},
+		{
 			name:       "Vicious Puzzle",
 			puzzle:     "097600504003000090060000000006900805700005000000030200000870003450020080000090600",
+			wantSolved: true,
+		},
+		{
+			name:       "Hard Puzzle",
+			puzzle:     "200400580000208409090000000000007000309000600714000205003800006000035040000940002",
 			wantSolved: true,
 		},
 		{
@@ -36,6 +48,12 @@ func TestBruteForceSolver(t *testing.T) {
 			wantSolved: false,
 		},
 	}
+}
+
+func TestBruteForceSolver(t *testing.T) {
+	solver := NewBruteForceSolver()
+
+	tests := testCases()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,8 +66,30 @@ func TestBruteForceSolver(t *testing.T) {
 				return
 			}
 
-			assert.Error(t, err, ErrUnsolvablePuzzle)
+			assert.ErrorIs(t, err, ErrUnsolvablePuzzle)
 			assert.Equal(t, board.Unsolved, boardAfterAttempt.State())
+		})
+	}
+}
+
+func TestLogicalSolver(t *testing.T) {
+	solver := NewLogicalSolver()
+
+	tests := testCases()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b, _ := board.FromString(tt.puzzle, false)
+			boardAfterAttempt, _, err := solver.Solve(*b)
+
+			if tt.wantSolved {
+				assert.NoError(t, err)
+				assert.Equal(t, board.Solved, boardAfterAttempt.State())
+				return
+			}
+
+			assert.ErrorIs(t, err, ErrUnsolvablePuzzle)
+			assert.Equal(t, board.Invalid, boardAfterAttempt.State())
 		})
 	}
 }
