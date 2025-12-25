@@ -19,7 +19,7 @@ var (
 )
 
 const (
-	Row Scope = iota + 1
+	Row Scope = iota
 	Column
 	Box
 )
