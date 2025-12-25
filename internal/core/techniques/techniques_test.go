@@ -11,7 +11,7 @@ import (
 func TestTechniques(t *testing.T) {
 	tests := []struct {
 		name           string
-		technique      FuncAdapter
+		technique      Technique
 		board          string
 		shouldProgress bool
 		expecting      Step
@@ -26,7 +26,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "LastDigit (Row)",
 				AffectedCells:     []board.Coordinates{{Row: 4, Col: 4}},
 				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Row).Slice(),
-				RemovedCandidates: 0b0000100000,
+				RemovedCandidates: board.MustCandidateSet(5),
 				PlacedValue:       ptr.To(5),
 			},
 		},
@@ -40,7 +40,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "LastDigit (Column)",
 				AffectedCells:     []board.Coordinates{{Row: 3, Col: 3}},
 				ReasonCells:       Peers.Of(board.Coordinates{Row: 3, Col: 3}).Across(Column).Slice(),
-				RemovedCandidates: 0b0000010000,
+				RemovedCandidates: board.MustCandidateSet(4),
 				PlacedValue:       ptr.To(4),
 			},
 		},
@@ -54,7 +54,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "LastDigit (Box)",
 				AffectedCells:     []board.Coordinates{{Row: 4, Col: 4}},
 				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Box).Slice(),
-				RemovedCandidates: 0b0000100000,
+				RemovedCandidates: board.MustCandidateSet(5),
 				PlacedValue:       ptr.To(5),
 			},
 		},
@@ -75,7 +75,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "NakedSingle",
 				AffectedCells:     []board.Coordinates{{Row: 6, Col: 2}},
 				ReasonCells:       Peers.Of(board.Coordinates{Row: 6, Col: 2}).Across(AllScopes...).Slice(),
-				RemovedCandidates: 0b1000000000,
+				RemovedCandidates: board.MustCandidateSet(9),
 				PlacedValue:       ptr.To(9),
 			},
 		},
@@ -96,7 +96,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "NakedPair",
 				ReasonCells:       []board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 7}},
 				AffectedCells:     []board.Coordinates{{Row: 3, Col: 0}, {Row: 3, Col: 4}, {Row: 3, Col: 5}},
-				RemovedCandidates: 0b0100100000,
+				RemovedCandidates: board.MustCandidateSet(5, 8),
 			},
 		},
 		{
@@ -116,7 +116,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "NakedTriple",
 				ReasonCells:       []board.Coordinates{{Row: 8, Col: 2}, {Row: 8, Col: 6}, {Row: 8, Col: 8}},
 				AffectedCells:     []board.Coordinates{{Row: 8, Col: 0}, {Row: 8, Col: 1}, {Row: 8, Col: 4}},
-				RemovedCandidates: 0b1001000010,
+				RemovedCandidates: board.MustCandidateSet(1, 6, 9),
 			},
 		},
 		{
@@ -136,7 +136,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "NakedQuad",
 				ReasonCells:       []board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 8}, {Row: 4, Col: 6}, {Row: 5, Col: 6}},
 				AffectedCells:     []board.Coordinates{{Row: 3, Col: 7}, {Row: 4, Col: 7}, {Row: 4, Col: 8}, {Row: 5, Col: 7}, {Row: 5, Col: 8}},
-				RemovedCandidates: 0b0100100110,
+				RemovedCandidates: board.MustCandidateSet(1, 2, 5, 8),
 			},
 		},
 		{
@@ -156,7 +156,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "HiddenSingle (Row)",
 				ReasonCells:       []board.Coordinates{{Row: 2, Col: 6}, {Row: 2, Col: 7}, {Row: 2, Col: 8}},
 				AffectedCells:     []board.Coordinates{{Row: 2, Col: 3}},
-				RemovedCandidates: 0b0000000100,
+				RemovedCandidates: board.MustCandidateSet(2),
 				PlacedValue:       ptr.To(2),
 			},
 		},
@@ -170,12 +170,72 @@ func TestTechniques(t *testing.T) {
 				Technique:         "HiddenSingle (Box)",
 				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}, {Row: 8, Col: 8}},
 				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
-				RemovedCandidates: 0b0001000000,
+				RemovedCandidates: board.MustCandidateSet(6),
 				PlacedValue:       ptr.To(6),
 			},
 		},
 		{
 			name:           "HiddenSingle (No Progress)",
+			technique:      HiddenSingle,
+			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
+		{
+			name:           "HiddenPair",
+			technique:      HiddenPair,
+			board:          "000000020504830000000000700000000000000000000000000000000000000000000000000000000",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "2 candidates [2, 7] in R1 can only fit in 2 cells [R1C1, R1C5], therefore they must be placed there, removing other candidates from those cells",
+				Technique:         "HiddenPair",
+				ReasonCells:       []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
+				AffectedCells:     []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
+				RemovedCandidates: board.MustCandidateSet(2, 7),
+			},
+		},
+		{
+			name:           "HiddenPair (No Progress)",
+			technique:      HiddenPair,
+			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
+		{
+			name:           "HiddenTriple",
+			technique:      HiddenTriple,
+			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "2 candidates [2, 7] in R1 can only fit in 2 cells [R1C1, R1C5], therefore they must be placed there, removing other candidates from those cells",
+				Technique:         "HiddenTriple",
+				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}},
+				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
+				RemovedCandidates: board.MustCandidateSet(2),
+			},
+		},
+		{
+			name:           "HiddenTriple (No Progress)",
+			technique:      HiddenSingle,
+			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
+		{
+			name:           "HiddenQuad",
+			technique:      HiddenQuad,
+			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "2 candidates [2, 7] in R1 can only fit in 2 cells [R1C1, R1C5], therefore they must be placed there, removing other candidates from those cells",
+				Technique:         "HiddenQuad",
+				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}},
+				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
+				RemovedCandidates: board.MustCandidateSet(2),
+			},
+		},
+		{
+			name:           "HiddenQuad (No Progress)",
 			technique:      HiddenSingle,
 			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
 			shouldProgress: false,
