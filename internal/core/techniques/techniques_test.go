@@ -191,7 +191,7 @@ func TestTechniques(t *testing.T) {
 				Technique:         "HiddenPair",
 				ReasonCells:       []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
 				AffectedCells:     []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
-				RemovedCandidates: board.MustCandidateSet(2, 7),
+				RemovedCandidates: board.MustCandidateSet(1, 6, 9),
 			},
 		},
 		{
@@ -204,14 +204,14 @@ func TestTechniques(t *testing.T) {
 		{
 			name:           "HiddenTriple",
 			technique:      HiddenTriple,
-			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
+			board:          "010402587870000000520768100102000950000000000000059601701000400030080010000106003",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "2 candidates [2, 7] in R1 can only fit in 2 cells [R1C1, R1C5], therefore they must be placed there, removing other candidates from those cells",
+				Description:       "3 candidates [5, 7, 8] in C2 can only fit in 3 cells [R4C3, R5C3, R8C3], therefore they must be placed there, removing other candidates from those cells",
 				Technique:         "HiddenTriple",
-				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}},
-				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
-				RemovedCandidates: board.MustCandidateSet(2),
+				ReasonCells:       []board.Coordinates{{Row: 4, Col: 3}, {Row: 5, Col: 3}, {Row: 8, Col: 3}},
+				AffectedCells:     []board.Coordinates{{Row: 4, Col: 3}, {Row: 5, Col: 3}, {Row: 8, Col: 3}},
+				RemovedCandidates: board.MustCandidateSet(3, 6, 9),
 			},
 		},
 		{
@@ -224,14 +224,14 @@ func TestTechniques(t *testing.T) {
 		{
 			name:           "HiddenQuad",
 			technique:      HiddenQuad,
-			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
+			board:          "790002800000500000080000040279400036060700924040296700000120600000807490000054000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "2 candidates [2, 7] in R1 can only fit in 2 cells [R1C1, R1C5], therefore they must be placed there, removing other candidates from those cells",
+				Description:       "4 candidates [4, 7, 8, 9] in B7 can only fit in 4 cells [R6C0, R6C2, R8C0, R8C2], therefore they must be placed there, removing other candidates from those cells",
 				Technique:         "HiddenQuad",
-				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}},
-				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
-				RemovedCandidates: board.MustCandidateSet(2),
+				ReasonCells:       []board.Coordinates{{Row: 6, Col: 0}, {Row: 6, Col: 2}, {Row: 8, Col: 0}, {Row: 8, Col: 2}},
+				AffectedCells:     []board.Coordinates{{Row: 6, Col: 0}, {Row: 6, Col: 2}, {Row: 8, Col: 0}, {Row: 8, Col: 2}},
+				RemovedCandidates: board.MustCandidateSet(1, 2, 3, 6),
 			},
 		},
 		{
