@@ -63,7 +63,7 @@ func nakedMultiple(puzzle *board.Board, count int, techniqueName string) (Step, 
 				continue
 			}
 
-			combinations := Subsets(potentialMultiples, count)
+			combinations := PeerSetSubsets(potentialMultiples, count)
 
 			for _, combo := range combinations {
 				candidates := combo.Candidates(*puzzle)

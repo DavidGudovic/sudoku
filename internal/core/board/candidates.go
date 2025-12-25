@@ -129,8 +129,9 @@ func (cs *CandidateSet) String() string {
 	return sb.String()
 }
 
-// Subsets generates all possible CandidateSet combinations of size n from the given CandidateSet.
-func Subsets(cs CandidateSet, size int) []CandidateSet {
+// CandidateSubsets generates all possible CandidateSet combinations of size n from the given CandidateSet.
+// Mathematically, this is equivalent to computing "n choose k" (nCk) combinations.
+func CandidateSubsets(cs CandidateSet, size int) []CandidateSet {
 	if size == 0 {
 		return []CandidateSet{NoCandidates}
 	}
@@ -150,12 +151,12 @@ func Subsets(cs CandidateSet, size int) []CandidateSet {
 	rest := cs
 
 	var results []CandidateSet
-	for _, combo := range Subsets(rest, size-1) {
+	for _, combo := range CandidateSubsets(rest, size-1) {
 		combo.Merge(first)
 		results = append(results, combo)
 	}
 
-	results = append(results, Subsets(rest, size)...)
+	results = append(results, CandidateSubsets(rest, size)...)
 
 	return results
 }

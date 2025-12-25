@@ -448,8 +448,9 @@ func (ps PeerSet) String() string {
 	return sb.String()
 }
 
-// Subsets generates all possible PeerSet combinations of size n from the given PeerSet.
-func Subsets(ps PeerSet, size int) []PeerSet {
+// PeerSetSubsets generates all possible PeerSet combinations of size n from the given PeerSet.
+// Mathematically, this is equivalent to computing "n choose k" (nCk) combinations.
+func PeerSetSubsets(ps PeerSet, size int) []PeerSet {
 	if size == 0 {
 		return []PeerSet{NoPeers}
 	}
@@ -467,11 +468,11 @@ func Subsets(ps PeerSet, size int) []PeerSet {
 	rest := ps.Without(first)
 
 	var results []PeerSet
-	for _, combo := range Subsets(rest, size-1) {
+	for _, combo := range PeerSetSubsets(rest, size-1) {
 		results = append(results, combo.With(first))
 	}
 
-	results = append(results, Subsets(rest, size)...)
+	results = append(results, PeerSetSubsets(rest, size)...)
 
 	return results
 }
