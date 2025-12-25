@@ -216,7 +216,7 @@ func TestTechniques(t *testing.T) {
 		},
 		{
 			name:           "HiddenTriple (No Progress)",
-			technique:      HiddenSingle,
+			technique:      HiddenTriple,
 			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
 			shouldProgress: false,
 			expecting:      Step{},
@@ -236,7 +236,7 @@ func TestTechniques(t *testing.T) {
 		},
 		{
 			name:           "HiddenQuad (No Progress)",
-			technique:      HiddenSingle,
+			technique:      HiddenQuad,
 			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
 			shouldProgress: false,
 			expecting:      Step{},
