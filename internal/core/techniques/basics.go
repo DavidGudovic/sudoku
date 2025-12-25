@@ -78,7 +78,7 @@ func LockedCandidates(puzzle *board.Board) (Step, error) {
 				mask := board.MustCandidateSet(candidate)
 				peers := Peers.InScope(s, i).ContainingCandidates(*puzzle, mask)
 
-				if peers.Count() > 3 {
+				if peers.Count() > 3 || peers.Count() < 2 {
 					continue
 				}
 

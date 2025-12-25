@@ -257,7 +257,7 @@ func TestTechniques(t *testing.T) {
 		{
 			name:           "LockedCandidates (No Progress)",
 			technique:      LockedCandidates,
-			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
+			board:          "010000496060941807490060100129534678840796010706128940084610709900480061601079084",
 			shouldProgress: false,
 			expecting:      Step{},
 		},
