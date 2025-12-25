@@ -9,15 +9,6 @@ import (
 // For any value If in any row or box only one cell has the value as a candidate, the value must be there.
 // This is true even when the cell has more than one candidate itself.
 func HiddenSingle(puzzle *board.Board) (Step, error) {
-	scopes := [3]struct {
-		scope Scope
-		index int
-	}{
-		{Row, 0},
-		{Column, 0},
-		{Box, 0},
-	}
-
 	for coords := range Peers.All().Each() {
 		candidates := puzzle.CellAt(coords).Candidates()
 
@@ -25,19 +16,15 @@ func HiddenSingle(puzzle *board.Board) (Step, error) {
 			continue
 		}
 
-		scopes[0].index = coords.Row
-		scopes[1].index = coords.Col
-		scopes[2].index = coords.BoxIndex()
-
 		for candidate := range candidates.Each() {
 			candidateMask := board.MustCandidateSet(candidate)
 
-			for _, s := range scopes {
-				scopedPeers := Peers.Of(coords).Across(s.scope)
+			for _, s := range AllScopes {
+				scopedPeers := Peers.Of(coords).Across(s)
 
 				if scopedPeers.ContainingCandidates(*puzzle, candidateMask) == NoPeers {
 					step := Step{
-						Technique:         "HiddenSingle (" + s.scope.String() + ")",
+						Technique:         "HiddenSingle (" + s.String() + ")",
 						AffectedCells:     NoPeers.With(coords),
 						ReasonCells:       scopedPeers.EmptyCells(*puzzle),
 						RemovedCandidates: candidateMask,
