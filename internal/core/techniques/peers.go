@@ -1,6 +1,7 @@
 package techniques
 
 import (
+	"errors"
 	"iter"
 	"math/bits"
 	"strings"
@@ -11,13 +12,14 @@ import (
 //go:generate stringer -type=Scope
 
 var (
-	NoPeers          = PeerSet{}
-	FullRow   uint16 = 0b111111111
-	AllScopes        = []Scope{Row, Column, Box}
+	NoPeers                = PeerSet{}
+	FullRow         uint16 = 0b111111111
+	AllScopes              = []Scope{Row, Column, Box}
+	ErrPeerSetEmpty        = errors.New("peer set is empty")
 )
 
 const (
-	Row Scope = iota
+	Row Scope = iota + 1
 	Column
 	Box
 )
@@ -187,30 +189,36 @@ func (ps PeerSet) Union(other PeerSet) PeerSet {
 	return result
 }
 
-// HasPeersInRow checks if the PeerSet contains any peers in the specified row.
-func (ps PeerSet) HasPeersInRow(row int) bool {
-	return ps[row] != 0
-}
+// ShareScope checks if the entire PeerSet shares the specified Scope.
+func (ps PeerSet) ShareScope(s Scope) bool {
+	if ps.Count() > board.Size {
+		return false
+	}
 
-// HasPeersInCol checks if the PeerSet contains any peers in the specified column.
-func (ps PeerSet) HasPeersInCol(col int) bool {
-	for r := 0; r < board.Size; r++ {
-		if ps[r]&(1<<col) != 0 {
-			return true
+	first, _ := ps.First()
+
+	for c := range ps.Each() {
+		if c == first {
+			continue
+		}
+
+		switch s {
+		case Row:
+			if first.Row != c.Row {
+				return false
+			}
+		case Column:
+			if first.Col != c.Col {
+				return false
+			}
+		case Box:
+			if first.BoxIndex() != c.BoxIndex() {
+				return false
+			}
 		}
 	}
-	return false
-}
 
-// HasPeersInBox checks if the PeerSet contains any peers in the specified box.
-func (ps PeerSet) HasPeersInBox(boxIndex int) bool {
-	for i := 0; i < board.BoxSize*board.BoxSize; i++ {
-		coords := board.MustCoordsFromBoxIndex(boxIndex, i)
-		if ps.Contains(coords) {
-			return true
-		}
-	}
-	return false
+	return true
 }
 
 // Count returns the amount of board.Coordinates in the set.
@@ -397,6 +405,19 @@ func (ps PeerSet) ContainingValues(p board.Board, values ...int) PeerSet {
 	}
 
 	return result
+}
+
+// First returns the first board.Coordinates in the PeerSet.
+func (ps PeerSet) First() (board.Coordinates, error) {
+	for r := 0; r < board.Size; r++ {
+		mask := ps[r]
+		if mask != 0 {
+			c := bits.TrailingZeros16(mask)
+			return board.MustCoordinates(r, c), nil
+		}
+	}
+
+	return board.Coordinates{}, ErrPeerSetEmpty
 }
 
 // Each executes a function for every coordinate present in the PeerSet.
