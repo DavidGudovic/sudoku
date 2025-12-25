@@ -57,7 +57,7 @@ coords, _ := board.NewCoordinates(4, 5)
 puzzle.SetValueOnCoords(coords, 7)
 
 // Check board state
-state := puzzle.GetState() // Invalid, Unsolved, or Solved
+state := puzzle.State() // Invalid, Unsolved, or Solved
 
 // Examine cell candidates
 cell := puzzle.CellAt(coords)
