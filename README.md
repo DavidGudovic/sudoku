@@ -94,14 +94,22 @@ Human-like solving techniques producing step-by-step solutions:
 - Last Digit (Row, Column, Box variants)
 - Naked Single
 - Naked Pair
-
-**Planned Techniques:**
+- Naked Triple
+- Naked Quad
 - Hidden Single
 - Hidden Pair
-- Pointing Pair
+- Hidden Triple
+- Hidden Quad
+
+**Planned Techniques:**
+- Locked Candidates
 - X-Wing
+- Y-Wing
+- W-Wing
+- Swordfish
 - Skyscraper
 - Two-String Kite
+- AIC's 
 
 Each technique returns a detailed `Step` structure containing all information needed for educational UIs:
 
