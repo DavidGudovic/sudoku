@@ -1,8 +1,6 @@
 package techniques
 
 import (
-	"fmt"
-
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
@@ -26,7 +24,7 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 
 				step := Step{
 					Technique:         "LastDigit",
-					AffectedCells:     []board.Coordinates{coords},
+					AffectedCells:     NoPeers.With(coords),
 					RemovedCandidates: targetCellCandidates,
 					PlacedValue:       &val,
 				}
@@ -40,18 +38,15 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 				if rowPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
 					found = true
 					step.Technique += " (Row)"
-					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Row ", coords.Row, ", placing a ", val, " at ", coords)
-					step.ReasonCells = rowPeers.Slice()
+					step.ReasonCells = rowPeers
 				} else if columnPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
 					found = true
 					step.Technique += " (Column)"
-					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Col ", coords.Col, ", placing a ", val, " at ", coords)
-					step.ReasonCells = columnPeers.Slice()
+					step.ReasonCells = columnPeers
 				} else if boxPeers.With(coords).Candidates(*puzzle) == targetCellCandidates {
 					found = true
 					step.Technique += " (Box)"
-					step.Description = fmt.Sprint("Value ", val, " can only go in one place in Box ", coords.BoxIndex(), ", placing a ", val, " at ", coords)
-					step.ReasonCells = boxPeers.Slice()
+					step.ReasonCells = boxPeers
 				}
 
 				if found {
@@ -94,9 +89,8 @@ func LockedCandidates(puzzle *board.Board) (Step, error) {
 
 				step := Step{
 					Technique:         "LockedCandidates (" + s.String() + ")",
-					AffectedCells:     affected.Slice(),
-					ReasonCells:       peers.Slice(),
-					Description:       fmt.Sprint("Candidate ", candidate, " in ", s, " ", i, ", is locked to it's box, removing from peers"),
+					AffectedCells:     affected,
+					ReasonCells:       peers,
 					RemovedCandidates: mask,
 				}
 

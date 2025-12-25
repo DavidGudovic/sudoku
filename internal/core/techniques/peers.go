@@ -441,17 +441,10 @@ func (ps PeerSet) Each() iter.Seq[board.Coordinates] {
 // Used for when the caller needs a slice, e.g. for Step.AffectedCells.
 // Should not be used for iteration, instead use Each()
 func (ps PeerSet) Slice() []board.Coordinates {
-	var coords []board.Coordinates
-
-	for row := 0; row < board.Size; row++ {
-		for col := 0; col < board.Size; col++ {
-			c := board.MustCoordinates(row, col)
-			if ps.Contains(c) {
-				coords = append(coords, c)
-			}
-		}
+	coords := make([]board.Coordinates, 0, ps.Count())
+	for c := range ps.Each() {
+		coords = append(coords, c)
 	}
-
 	return coords
 }
 

@@ -1,8 +1,6 @@
 package techniques
 
 import (
-	"fmt"
-
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
@@ -16,11 +14,10 @@ func NakedSingle(puzzle *board.Board) (Step, error) {
 
 		step := Step{
 			Technique:         "NakedSingle",
-			AffectedCells:     []board.Coordinates{c},
-			ReasonCells:       Peers.Of(c).Across(AllScopes...).Slice(),
+			AffectedCells:     NoPeers.With(c),
+			ReasonCells:       Peers.Of(c).Across(AllScopes...),
 			RemovedCandidates: candidates,
 			PlacedValue:       &val,
-			Description:       fmt.Sprint("The candidate ", val, " is the only one left at ", c, ", placing a ", val),
 		}
 
 		return step.MustApplyTo(puzzle), nil
@@ -79,9 +76,8 @@ func nakedMultiple(puzzle *board.Board, count int, techniqueName string) (Step, 
 
 					step := Step{
 						Technique:         techniqueName,
-						Description:       fmt.Sprint(techniqueName, " found at ", combo.String(), ", removing candidates ", candidates.String(), " from mutual peers"),
-						AffectedCells:     affected.Slice(),
-						ReasonCells:       combo.Slice(),
+						AffectedCells:     affected,
+						ReasonCells:       combo,
 						RemovedCandidates: candidates,
 					}
 

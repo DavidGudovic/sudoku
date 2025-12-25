@@ -22,10 +22,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000000000000000000000000000000000123406789000000000000000000000000000000000000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Value 5 can only go in one place in Row 4, placing a 5 at R4C4",
 				Technique:         "LastDigit (Row)",
-				AffectedCells:     []board.Coordinates{{Row: 4, Col: 4}},
-				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Row).Slice(),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 4, Col: 4}}...),
+				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Row),
 				RemovedCandidates: board.MustCandidateSet(5),
 				PlacedValue:       ptr.To(5),
 			},
@@ -36,10 +35,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000600000000500000000700000000000000000100000000300000000900000000200000000800000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Value 4 can only go in one place in Col 3, placing a 4 at R3C3",
 				Technique:         "LastDigit (Column)",
-				AffectedCells:     []board.Coordinates{{Row: 3, Col: 3}},
-				ReasonCells:       Peers.Of(board.Coordinates{Row: 3, Col: 3}).Across(Column).Slice(),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 3, Col: 3}}...),
+				ReasonCells:       Peers.Of(board.Coordinates{Row: 3, Col: 3}).Across(Column),
 				RemovedCandidates: board.MustCandidateSet(4),
 				PlacedValue:       ptr.To(4),
 			},
@@ -50,10 +48,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000000000000000000000000000123000000604000000789000000000000000000000000000000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Value 5 can only go in one place in Box 4, placing a 5 at R4C4",
 				Technique:         "LastDigit (Box)",
-				AffectedCells:     []board.Coordinates{{Row: 4, Col: 4}},
-				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Box).Slice(),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 4, Col: 4}}...),
+				ReasonCells:       Peers.Of(board.Coordinates{Row: 4, Col: 4}).Across(Box),
 				RemovedCandidates: board.MustCandidateSet(5),
 				PlacedValue:       ptr.To(5),
 			},
@@ -71,10 +68,9 @@ func TestTechniques(t *testing.T) {
 			board:          "002000000006000000007000000008000000004000000003000000000000150000000000000000000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "The candidate 9 is the only one left at R6C2, placing a 9",
 				Technique:         "NakedSingle",
-				AffectedCells:     []board.Coordinates{{Row: 6, Col: 2}},
-				ReasonCells:       Peers.Of(board.Coordinates{Row: 6, Col: 2}).Across(AllScopes...).Slice(),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 6, Col: 2}}...),
+				ReasonCells:       Peers.Of(board.Coordinates{Row: 6, Col: 2}).Across(AllScopes...),
 				RemovedCandidates: board.MustCandidateSet(9),
 				PlacedValue:       ptr.To(9),
 			},
@@ -92,10 +88,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000524768784916235265700491047000006020807143000000927010070309070600014000301672",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "NakedPair found at R3C6,R3C7, removing candidates 5,8 from mutual peers",
 				Technique:         "NakedPair",
-				ReasonCells:       []board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 7}},
-				AffectedCells:     []board.Coordinates{{Row: 3, Col: 0}, {Row: 3, Col: 4}, {Row: 3, Col: 5}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 7}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 3, Col: 0}, {Row: 3, Col: 4}, {Row: 3, Col: 5}}...),
 				RemovedCandidates: board.MustCandidateSet(5, 8),
 			},
 		},
@@ -112,10 +107,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000060431628795500001020642319587715286934003754216004000072007002350000800040",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "NakedTriple found at R8C2,R8C6,R8C8, removing candidates 1,6,9 from mutual peers",
 				Technique:         "NakedTriple",
-				ReasonCells:       []board.Coordinates{{Row: 8, Col: 2}, {Row: 8, Col: 6}, {Row: 8, Col: 8}},
-				AffectedCells:     []board.Coordinates{{Row: 8, Col: 0}, {Row: 8, Col: 1}, {Row: 8, Col: 4}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 8, Col: 2}, {Row: 8, Col: 6}, {Row: 8, Col: 8}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 8, Col: 0}, {Row: 8, Col: 1}, {Row: 8, Col: 4}}...),
 				RemovedCandidates: board.MustCandidateSet(1, 6, 9),
 			},
 		},
@@ -132,10 +126,9 @@ func TestTechniques(t *testing.T) {
 			board:          "381962700465387921927541600010473000040608000038209000276134009893725416154896372",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "NakedQuad found at R3C6,R3C8,R4C6,R5C6, removing candidates 1,2,5,8 from mutual peers",
 				Technique:         "NakedQuad",
-				ReasonCells:       []board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 8}, {Row: 4, Col: 6}, {Row: 5, Col: 6}},
-				AffectedCells:     []board.Coordinates{{Row: 3, Col: 7}, {Row: 4, Col: 7}, {Row: 4, Col: 8}, {Row: 5, Col: 7}, {Row: 5, Col: 8}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 3, Col: 6}, {Row: 3, Col: 8}, {Row: 4, Col: 6}, {Row: 5, Col: 6}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 3, Col: 7}, {Row: 4, Col: 7}, {Row: 4, Col: 8}, {Row: 5, Col: 7}, {Row: 5, Col: 8}}...),
 				RemovedCandidates: board.MustCandidateSet(1, 2, 5, 8),
 			},
 		},
@@ -152,10 +145,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000020000000000857034000000000000000000000000000000000000000000000000000000000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "None of the empty cells in Row 2 can hold a 2 except R2C3, placing a 2",
 				Technique:         "HiddenSingle (Row)",
-				ReasonCells:       []board.Coordinates{{Row: 2, Col: 6}, {Row: 2, Col: 7}, {Row: 2, Col: 8}},
-				AffectedCells:     []board.Coordinates{{Row: 2, Col: 3}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 2, Col: 6}, {Row: 2, Col: 7}, {Row: 2, Col: 8}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 2, Col: 3}}...),
 				RemovedCandidates: board.MustCandidateSet(2),
 				PlacedValue:       ptr.To(2),
 			},
@@ -166,10 +158,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000000000000000000000000000000000000000000000000000000000072000000431060000500",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "None of the empty cells in Box 8 can hold a 6 except R6C6, placing a 6",
 				Technique:         "HiddenSingle (Box)",
-				ReasonCells:       []board.Coordinates{{Row: 8, Col: 7}, {Row: 8, Col: 8}},
-				AffectedCells:     []board.Coordinates{{Row: 6, Col: 6}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 8, Col: 7}, {Row: 8, Col: 8}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 6, Col: 6}}...),
 				RemovedCandidates: board.MustCandidateSet(6),
 				PlacedValue:       ptr.To(6),
 			},
@@ -187,10 +178,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000020504830000000000700000000000000000000000000000000000000000000000000000000",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "2 candidates [2,7] in Row-1 can only fit in 2 cells [R1C1,R1C5], therefore they must be placed there, removing other candidates from those cells",
 				Technique:         "HiddenPair",
-				ReasonCells:       []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
-				AffectedCells:     []board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 1, Col: 1}, {Row: 1, Col: 5}}...),
 				RemovedCandidates: board.MustCandidateSet(1, 6, 9),
 			},
 		},
@@ -207,10 +197,9 @@ func TestTechniques(t *testing.T) {
 			board:          "385601000109500000020030510000005000030010060000400000017050080003100900000007132",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "3 candidates [3,6,8] in Box-2 can only fit in 3 cells [R1C6,R1C8,R2C8], therefore they must be placed there, removing other candidates from those cells",
 				Technique:         "HiddenTriple",
-				ReasonCells:       []board.Coordinates{{Row: 1, Col: 6}, {Row: 1, Col: 8}, {Row: 2, Col: 8}},
-				AffectedCells:     []board.Coordinates{{Row: 1, Col: 6}, {Row: 1, Col: 8}, {Row: 2, Col: 8}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 1, Col: 6}, {Row: 1, Col: 8}, {Row: 2, Col: 8}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 1, Col: 6}, {Row: 1, Col: 8}, {Row: 2, Col: 8}}...),
 				RemovedCandidates: board.MustCandidateSet(2, 4, 7, 9),
 			},
 		},
@@ -227,10 +216,9 @@ func TestTechniques(t *testing.T) {
 			board:          "000000001000010002000634905000309056003860049679145823000251638126783594835496217",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "4 candidates [3,5,6,9] in Box-0 can only fit in 4 cells [R0C0,R0C1,R1C0,R1C1], therefore they must be placed there, removing other candidates from those cells",
 				Technique:         "HiddenQuad",
-				ReasonCells:       []board.Coordinates{{Row: 0, Col: 0}, {Row: 0, Col: 1}, {Row: 1, Col: 0}, {Row: 1, Col: 1}},
-				AffectedCells:     []board.Coordinates{{Row: 0, Col: 0}, {Row: 0, Col: 1}, {Row: 1, Col: 0}, {Row: 1, Col: 1}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 0, Col: 0}, {Row: 0, Col: 1}, {Row: 1, Col: 0}, {Row: 1, Col: 1}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 0, Col: 0}, {Row: 0, Col: 1}, {Row: 1, Col: 0}, {Row: 1, Col: 1}}...),
 				RemovedCandidates: board.MustCandidateSet(2, 4, 7, 8),
 			},
 		},
@@ -247,10 +235,9 @@ func TestTechniques(t *testing.T) {
 			board:          "984000000002500040001904002006097230003602000209035610195768423427351896638009751",
 			shouldProgress: true,
 			expecting: Step{
-				Description:       "Candidate 5 in Row 0, is locked to it's box, removing from peers",
 				Technique:         "LockedCandidates (Row)",
-				ReasonCells:       []board.Coordinates{{Row: 0, Col: 6}, {Row: 0, Col: 8}},
-				AffectedCells:     []board.Coordinates{{Row: 2, Col: 6}},
+				ReasonCells:       NoPeers.Including([]board.Coordinates{{Row: 0, Col: 6}, {Row: 0, Col: 8}}...),
+				AffectedCells:     NoPeers.Including([]board.Coordinates{{Row: 2, Col: 6}}...),
 				RemovedCandidates: board.MustCandidateSet(5),
 			},
 		},
@@ -282,7 +269,7 @@ func TestTechniques(t *testing.T) {
 			assert.True(t, step.MadeProgress())
 
 			// Should have affected the expected cells with correct placements/removals
-			for _, affected := range step.AffectedCells {
+			for affected := range step.AffectedCells.Each() {
 				cell := b.CellAt(affected)
 				if step.PlacedValue != nil {
 					assert.Equal(t, *step.PlacedValue, cell.Value())

@@ -1,8 +1,6 @@
 package techniques
 
 import (
-	"fmt"
-
 	"github.com/DavidGudovic/sudoku/internal/core/board"
 )
 
@@ -40,9 +38,8 @@ func HiddenSingle(puzzle *board.Board) (Step, error) {
 				if scopedPeers.ContainingCandidates(*puzzle, candidateMask) == NoPeers {
 					step := Step{
 						Technique:         "HiddenSingle (" + s.scope.String() + ")",
-						AffectedCells:     []board.Coordinates{coords},
-						ReasonCells:       scopedPeers.EmptyCells(*puzzle).Slice(),
-						Description:       fmt.Sprint("None of the empty cells in ", s.scope, " ", s.index, " can hold a ", candidate, " except ", coords, ", placing a ", candidate),
+						AffectedCells:     NoPeers.With(coords),
+						ReasonCells:       scopedPeers.EmptyCells(*puzzle),
 						RemovedCandidates: candidateMask,
 						PlacedValue:       &candidate,
 					}
@@ -116,9 +113,8 @@ func hiddenMultiple(puzzle *board.Board, count int, techniqueName string) (Step,
 
 				step := Step{
 					Technique:         techniqueName,
-					AffectedCells:     potentialMultiples.Slice(),
-					ReasonCells:       potentialMultiples.Slice(),
-					Description:       fmt.Sprint(fmt.Sprint(count, " candidates [", combo.String(), "] in ", scope.String(), "-", i, " can only fit in ", count, " cells [", potentialMultiples.String(), "], therefore they must be placed there, removing other candidates from those cells")),
+					AffectedCells:     potentialMultiples,
+					ReasonCells:       potentialMultiples,
 					RemovedCandidates: affected,
 				}
 

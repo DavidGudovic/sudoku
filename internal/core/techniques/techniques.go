@@ -20,8 +20,8 @@ type Technique func(*board.Board) (Step, error)
 type Step struct {
 	Description       string
 	Technique         string
-	AffectedCells     []board.Coordinates
-	ReasonCells       []board.Coordinates
+	AffectedCells     PeerSet
+	ReasonCells       PeerSet
 	RemovedCandidates board.CandidateSet
 	PlacedValue       *int
 }
@@ -36,7 +36,7 @@ func (s Step) MadeProgress() bool {
 
 // ApplyTo applies the step to the puzzle, returning an error if the step cannot be applied.
 func (s Step) ApplyTo(puzzle *board.Board) error {
-	for _, coords := range s.AffectedCells {
+	for coords := range s.AffectedCells.Each() {
 		if s.PlacedValue != nil {
 			err := puzzle.SetValueOnCoords(coords, *s.PlacedValue)
 			if err != nil {
