@@ -241,6 +241,26 @@ func TestTechniques(t *testing.T) {
 			shouldProgress: false,
 			expecting:      Step{},
 		},
+		{
+			name:           "LockedCandidates",
+			technique:      LockedCandidates,
+			board:          "984000000002500040001904002006097230003602000209035610195768423427351896638009751",
+			shouldProgress: true,
+			expecting: Step{
+				Description:       "Candidate 5 in Row 0, is locked to it's box, removing from peers",
+				Technique:         "LockedCandidates (Row)",
+				ReasonCells:       []board.Coordinates{{Row: 0, Col: 6}, {Row: 0, Col: 8}},
+				AffectedCells:     []board.Coordinates{{Row: 2, Col: 6}},
+				RemovedCandidates: board.MustCandidateSet(5),
+			},
+		},
+		{
+			name:           "LockedCandidates (No Progress)",
+			technique:      LockedCandidates,
+			board:          "975421386148563700632879154006200430004300000390004000000940563409130278003002941",
+			shouldProgress: false,
+			expecting:      Step{},
+		},
 	}
 
 	for _, tt := range tests {

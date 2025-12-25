@@ -9,6 +9,7 @@ import (
 // LastDigit technique:
 //
 // If a candidate can only fit in one cell of a row, column, or box, place it there.
+// TODO: Refactor
 func LastDigit(puzzle *board.Board) (Step, error) {
 	var candidates board.CandidateSet
 	var coords board.Coordinates
@@ -63,6 +64,46 @@ func LastDigit(puzzle *board.Board) (Step, error) {
 	return Step{}, ErrCannotProgress
 }
 
-func PointingPair(_ *board.Board) (Step, error) {
-	return Step{}, nil
+// LockedCandidates technique:
+//
+// If candidates are confined to a single scope within a box,
+// those candidates can be removed from the shared scopes of the cells containing them.
+func LockedCandidates(puzzle *board.Board) (Step, error) {
+	relevant := Peers.All().EmptyCells(*puzzle)
+	candidates := relevant.Candidates(*puzzle)
+
+	for candidate := range candidates.Each() {
+		for _, s := range [2]Scope{Row, Column} {
+			for i := 0; i < board.Size; i++ {
+				mask := board.MustCandidateSet(candidate)
+				peers := Peers.InScope(s, i).ContainingCandidates(*puzzle, mask)
+
+				if peers.Count() > 3 {
+					continue
+				}
+
+				if peers.ShareScope(Box) == false {
+					continue
+				}
+
+				affected := Peers.Of(peers.Slice()...).AcrossSharedScopes().ContainingCandidates(*puzzle, mask)
+
+				if affected.IsEmpty() {
+					continue
+				}
+
+				step := Step{
+					Technique:         "LockedCandidates (" + s.String() + ")",
+					AffectedCells:     affected.Slice(),
+					ReasonCells:       peers.Slice(),
+					Description:       fmt.Sprint("Candidate ", candidate, " in ", s, " ", i, ", is locked to it's box, removing from peers"),
+					RemovedCandidates: mask,
+				}
+
+				return step.MustApplyTo(puzzle), nil
+			}
+		}
+	}
+
+	return Step{}, ErrCannotProgress
 }

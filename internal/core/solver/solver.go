@@ -45,7 +45,7 @@ func NewLogicalSolver() *SudokuSolver {
 			techniques.HiddenSingle,
 			techniques.NakedPair,
 			techniques.HiddenPair,
-			techniques.PointingPair,
+			techniques.LockedCandidates,
 			techniques.XWing,
 			techniques.Skyscraper,
 			techniques.TwoStringKite,
