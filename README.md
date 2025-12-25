@@ -196,9 +196,9 @@ Create custom solvers with specific technique combinations:
 import "github.com/DavidGudovic/sudoku/internal/core/techniques"
 
 customSolver := solver.NewSudokuSolver([]techniques.Technique{
-    techniques.FuncAdapter(techniques.LastDigit),
-    techniques.FuncAdapter(techniques.NakedSingle),
-    techniques.FuncAdapter(techniques.NakedPair),
+    techniques.LastDigit,
+    techniques.NakedSingle,
+    techniques.NakedPair,
     // Add your own techniques
 })
 
