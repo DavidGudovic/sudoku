@@ -100,9 +100,9 @@ Human-like solving techniques producing step-by-step solutions:
 - Hidden Pair
 - Hidden Triple
 - Hidden Quad
+- Locked Candidates
 
 **Planned Techniques:**
-- Locked Candidates
 - X-Wing
 - Y-Wing
 - W-Wing
